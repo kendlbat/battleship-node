@@ -160,8 +160,8 @@ class ServerManager {
         if (!path.startsWith("/")) path = "/" + path;
         this.register(new Requestable((req, res) => {
             // Remove path from the beginning of req.url
-            req.url = "/" + String(req.url).substring(path.length);
-            console.log(req.url);
+            req.url = String(req.url).substring(path.length);
+            if (!req.url.startsWith("/")) req.url = "/" + req.url;
             router.precall(req, res);
 
             let regexPathMatched = false;

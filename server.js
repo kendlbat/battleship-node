@@ -1,7 +1,7 @@
 const { ServerManager, Requestable, NOTFOUNDFALLBACK } = require("./wrapper");
+const apiRouter = require("./api");
 
 let server = new ServerManager();
-let apiRouter = new ServerManager({ fallback: NOTFOUNDFALLBACK });
 
 server.register(Requestable.fromStaticFolder("./public", "/static"));
 
