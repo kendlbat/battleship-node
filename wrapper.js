@@ -15,8 +15,7 @@ const NOTFOUNDFALLBACK = (req, res) => {
     res.end();
 }
 
-// A dictionary for linking file extensions to MIME-Types
-const FILENAME_TO_CONTENT_TYPE = {
+const DEFAULTmimeTypesForFileExtension = {
     "aac": "audio/aac",
     "abw": "application/x-abiword",
     "arc": "application/x-freearc",
@@ -93,6 +92,8 @@ const FILENAME_TO_CONTENT_TYPE = {
     "7z": "application/x-7z-compressed"
 };
 
+const DEFAULTfallbackMimeType = "application/octet-stream";
+
 class ServerManager {
     defaultFallback = () => undefined;
     defaultPrecall = () => undefined;
@@ -105,8 +106,17 @@ class ServerManager {
      *  * `port` : `number | undefined` -> Server listening port; Default:&nbsp;`8080`
      * @param {object | undefined} options
      */
-    constructor(options) {
-        if (!options) options = {};
+    constructor(options = {}, configFile = undefined) {
+        if (configFile) {
+            // Check if the config file exists
+            if (!fs.existsSync(configFile))
+                throw new Error(`Config file '${configFile}' does not exist!`);
+
+            // Read the config file
+            let config = JSON.parse(fs.readFileSync(configFile, "utf-8"));
+            options = { ...config, ...options };
+        }
+
         this.paths = {};
         this.fallback = options.fallback || this.defaultFallback;
         this.precall = options.precall || this.defaultPrecall;
@@ -114,6 +124,7 @@ class ServerManager {
         this.address = options.address || "0.0.0.0";
         this.port = options.port || 8080;
         this.server = null;
+        this.config = options;
     }
 
     /**
@@ -136,6 +147,8 @@ class ServerManager {
         }
         if (this.paths[sub]) replaced = this.paths[sub];
         this.paths[sub] = requestable;
+
+        requestable.setServerManager(this);
 
         return replaced;
     }
@@ -198,7 +211,7 @@ class ServerManager {
     listen() {
         return new Promise((resolve, reject) => {
             this.listening = true;
-            this.server = http.createServer((req, res) => {
+            this.server = http.createServer(async (req, res) => {
                 console.log(req.url);
                 this.precall(req, res);
 
@@ -226,7 +239,7 @@ class ServerManager {
                     }
                 }
             });
-            this.server.listen(this.port, this.address, () => resolve({ url: `http://${this.address}:${this.port}`, paths: this.paths }));
+            this.server.listen(this.port, this.address, () => resolve({ url: `http://${this.address}:${this.port}`, paths: this.paths, config: this.config }));
         });
 
     }
@@ -243,6 +256,7 @@ class Requestable {
         this.method = method;
         this.path = path;
         this.call = callback;
+        this.registeredTo = undefined;
     }
 
     /**
@@ -253,8 +267,23 @@ class Requestable {
      * @returns 
      */
     static fromStaticFile(filepath, contentType = undefined, urlpath) {
-        return new Requestable((req, res) => {
-            res.writeHead(200, { "Content-Type": contentType || FILENAME_TO_CONTENT_TYPE[filepath.split(".").pop()] || "application/octet" });
+        return new Requestable(function (req, res) {
+            let mimeTypeByFileExtension = {};
+            let fallbackMimeType;
+
+            if (this.registeredTo?.config?.contentTypes) {
+                Object.keys(this.registeredTo.config.contentTypes).forEach((ext) => {
+                    mimeTypeByFileExtension[ext] = this.registeredTo.config.contentTypes[ext];
+                });
+            } else {
+                mimeTypeByFileExtension = {...DEFAULTmimeTypesForFileExtension};
+            }
+    
+            if (this.registeredTo?.config?.fallbackMimeType) {
+                fallbackMimeType = this.registeredTo?.config?.fallbackMimeType || DEFAULTfallbackMimeType;
+            }
+
+            res.writeHead(200, { "Content-Type": contentType || mimeTypeByFileExtension[filepath.split(".").pop()] || DEFAULTfallbackMimeType });
             res.write(fs.readFileSync(filepath));
             res.end();
         }, "GET", urlpath);
@@ -274,7 +303,12 @@ class Requestable {
         if (folderpath.match(/.*\.\..*/g))
             throw new Error("Double dots are not currently supported in folder paths");
 
-        let basepath = String(urlpath).replace(/(^\/|\/$)/g, "").split("?")[0].split("#")[0].split("/");
+
+        if (urlpath.startsWith("/")) urlpath = urlpath.substring(1);
+        if (urlpath.endsWith("/")) urlpath = urlpath.substring(0, urlpath.length - 1);
+
+        let basepath = urlpath.split("?")[0].split("#")[0].split("/");
+        if (basepath.length === 1 && basepath[0] === '') basepath.shift();
         if (folderpath.startsWith("/")) folderpath = folderpath.replace(/^\.?\/?/g, "");
 
         let checkFolder;
@@ -289,10 +323,35 @@ class Requestable {
         if (!checkFolder.isDirectory())
             throw new Error("Local folder path does not point to a folder!");
 
-        return new Requestable((req, res) => {
+
+        return new Requestable(function (req, res) {  // DO NOT USE AN ARROW FUNCTION HERE - The this context won't work as intended
+            let mimeTypeByFileExtension = {};
+            let fallbackMimeType;
+
+
+            if (this.registeredTo?.config?.contentTypes) {
+                Object.keys(this.registeredTo.config.contentTypes).forEach((ext) => {
+                    mimeTypeByFileExtension[ext] = this.registeredTo.config.contentTypes[ext];
+                });
+            }
+    
+            if (this.registeredTo?.config?.fallbackMimeType) {
+                fallbackMimeType = this.registeredTo.config.fallbackMimeType || "application/octet-stream";
+            }
+
             let path = String(req.url).split("?")[0].split("#")[0].split("/");
             path.shift();
             basepath.forEach(() => path.shift());
+
+            // Redirect if path is root and url does not end with a slash
+            if (path.length === 0) {
+                res.writeHead(302, {
+                    "Location": req.url + "/"
+                });
+                res.end();
+                return;
+            }
+
             let filepath = folderpath + "/" + path.join("/");
             if (filepath.startsWith("/")) filepath = "." + filepath;
 
@@ -312,7 +371,6 @@ class Requestable {
             }
 
             console.log(filepath);
-            console.log(basepath);
 
             if (stats == undefined) {
                 res.writeHead(404, { "Content-Type": "text/plain" });
@@ -324,10 +382,24 @@ class Requestable {
 
                     res.writeHead(200, { "Content-Type": "text/html" });
 
-                    if (files.includes("index.html")) {
-                        res.write(fs.readFileSync(filepath + "/index.html"));
+                    // Check for registeredTo.config.indexPages
+                    let indexPage = undefined;
+                    if (this.registeredTo?.config?.indexPages) {
+                        for (let page of this.registeredTo.config.indexPages) {
+                            if (files.includes(page)) {
+                                indexPage = page;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (indexPage) {
+                        res.write(fs.readFileSync(filepath + "/" + indexPage));
                     } else {
-                        let html = `
+                        if (!this.registeredTo?.config?.allowDirectoryListing) {
+                            res.write("403 - Directory listing not allowed!");
+                        } else {
+                            let html = `
                         <!DOCTYPE html>
                         <html>
                             <head>
@@ -359,21 +431,23 @@ class Requestable {
                             <h1>Index of ${req.url}</h1>
                             <ul>
                         `;
-                        files.forEach((file) => {
-                            html += "<li class=\"" + (fs.statSync(filepath + "/" + file).isDirectory() ? "dir" : "file") + "\"><a href=\"" + req.url.replace(/\/$/g, "") + "/" + file.replace(/(^\/|\/$)/g, "") + "\">" + file + "</a></li>";
-                        });
-                        html += "</ul></body></html>";
-
-                        res.write(html);
+                            files.forEach((file) => {
+                                html += "<li class=\"" + (fs.statSync(filepath + "/" + file).isDirectory() ? "dir" : "file") + "\"><a href=\"" + req.url.replace(/\/$/g, "") + "/" + file.replace(/(^\/|\/$)/g, "") + "\">" + file + "</a></li>";
+                            });
+                            html += "</ul></body></html>";
+                            res.write(html);
+                        }
                     }
                 } else if (stats.isFile()) {
-                    res.writeHead(200, { "Content-Type": FILENAME_TO_CONTENT_TYPE[filepath.split(".").pop()] || "applicaton/octet" });
+                    // Get file length in bytes
+
+                    res.writeHead(200, { "Content-Type": mimeTypeByFileExtension[filepath.split(".").pop()] || "applicaton/octet", "Content-Length": stats.size, "Last-Modified": stats.mtime.toUTCString() });
                     res.write(fs.readFileSync(filepath));
                 }
             }
 
             res.end();
-        }, "ANY", new RegExp(`^[^@]+@@@/${basepath.join("/")}.*$`))
+        }, "ANY", new RegExp(`^[^@]+@@@/${basepath.join("/")}/?.*$`))
     }
 
     /**
@@ -445,6 +519,10 @@ class Requestable {
             }
         }, requestable.method, requestable.path);
     }
+
+    setServerManager(sm) {
+        this.registeredTo = sm;
+    } 
 }
 
 module.exports = {
