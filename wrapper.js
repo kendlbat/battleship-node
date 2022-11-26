@@ -192,10 +192,10 @@ class ServerManager {
             });
 
             if (!regexPathMatched) {
-                if (Object.keys(router.paths).includes(req.method + "@@@" + req.url)) {
-                    router.paths[req.method + "@@@" + req.url].call(req, res);
-                } else if (Object.keys(router.paths).includes("ANY@@@" + req.url)) {
-                    router.paths["ANY@@@" + req.url].call(req, res);
+                if (Object.keys(router.paths).includes(req.method + "@@@" + req.url.split("?")[0].split("#")[0])) {
+                    router.paths[req.method + "@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
+                } else if (Object.keys(router.paths).includes("ANY@@@" + req.url.split("?")[0].split("#")[0])) {
+                    router.paths["ANY@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
                 } else {
                     router.fallback(req, res);
                 }
@@ -230,10 +230,10 @@ class ServerManager {
                 });
 
                 if (!regexPathMatched) {
-                    if (Object.keys(this.paths).includes(req.method + "@@@" + req.url)) {
-                        this.paths[req.method + "@@@" + req.url].call(req, res);
-                    } else if (Object.keys(this.paths).includes("ANY@@@" + req.url)) {
-                        this.paths["ANY@@@" + req.url].call(req, res);
+                    if (Object.keys(this.paths).includes(req.method + "@@@" + req.url.split("?")[0].split("#")[0])) {
+                        this.paths[req.method + "@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
+                    } else if (Object.keys(this.paths).includes("ANY@@@" + req.url.split("?")[0].split("#")[0])) {
+                        this.paths["ANY@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
                     } else {
                         this.fallback(req, res);
                     }
