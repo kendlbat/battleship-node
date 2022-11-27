@@ -122,6 +122,12 @@ apiRouter.registerRouter(gameRouter, "/game");
     console.log(req.url);
 }; */
 
+// When root is requested, redirect to docs
+apiRouter.register(new Requestable((req, res) => {
+    res.writeHead(302, { "Location": "/docs/swagger/index.html" });
+    res.end();
+}, "GET", "/"));
+
 apiRouter.register(new Requestable((req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "ok", timestamp: Date.now() }));
@@ -387,13 +393,11 @@ gameRouter.register(new Requestable(async (req, res) => {
         return;
     }
 
-    let dimensions = game.game.player1.board.getDimensions();
-    
-
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
         status: "ok",
-        dimensions: dimensions
+        width: game.game.player1.board.width,
+        height: game.game.player1.board.height
     }));
 }, "GET", "/getBoardDimensions"));
 
@@ -417,9 +421,9 @@ gameRouter.register(new Requestable(async (req, res) => {
     let guesses;
 
     if (player === 1)
-        guesses = game.game.player2.board.getGuesses();
+        guesses = game.game.player2.board.guesses;
     else if (player === 2)
-        guesses = game.game.player1.board.getGuesses();
+        guesses = game.game.player1.board.guesses;
 
 
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -519,7 +523,6 @@ gameRouter.register(new Requestable(async (req, res) => {
             res.end(JSON.stringify({
                 status: "ok",
                 result: "win",
-                ship: guess.ship,
                 winner: playerNumber
             }));
         } else {
