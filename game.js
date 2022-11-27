@@ -117,11 +117,13 @@ class BattleshipBoard {
         if (ship.orientation === BattleshipOrientation.VERTICAL && ship.y + ship.size > this.height)
             return false;
 
-        for (let otherShip in this.ships)
-            if (otherShip.overlapsWith(ship))
+        let shipObj = new BattleshipVessel(ship.x, ship.y, ship.orientation, ship.size, ship.id);
+
+        for (let otherShip of this.ships)
+            if (otherShip.overlapsWith(shipObj))
                 return false;
 
-        this.ships.push(new BattleshipVessel(ship.x, ship.y, ship.orientation, ship.size, ship.id));
+        this.ships.push(shipObj);
         return true;
     }
 
@@ -138,7 +140,7 @@ class BattleshipBoard {
         if (x >= this.width || y >= this.height)
             throw new Error('Coordinates out of bounds');
 
-        for (let ship in this.ships)
+        for (let ship of this.ships)
             if (ship.containsPoint(x, y))
                 return true;
         return false;
@@ -165,7 +167,7 @@ class BattleshipBoard {
      * @param {BattleshipVessel[]} vessels 
      */
     placeVessels(vessels) {
-        for (let vessel in vessels)
+        for (let vessel of vessels)
             if (!this.placeShip(vessel)) {
                 this.ships = [];
                 return false;
