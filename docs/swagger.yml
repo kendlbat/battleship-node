@@ -83,7 +83,7 @@ paths:
           content:
             application/json:
               example:
-                status: 404,
+                status: 404
                 error: "Error message"
   /game/status:
     get:
@@ -133,7 +133,7 @@ paths:
           content:
             application/json:
               example:
-                status: 404,
+                status: 404
                 error: "Game not found"
       security:
         - gameId: []
@@ -174,7 +174,7 @@ paths:
           content:
             application/json:
               example:
-                status: 404,
+                status: 404
                 error: "Game not found"
       security:
         - gameId: []
@@ -191,7 +191,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Ships"
+              type: array
+              items:
+                $ref: "#/components/schemas/Ship"
             example:
               ships:
                 - x: 0
@@ -224,22 +226,542 @@ paths:
           description: successful operation
           content:
             application/json:
+              schema:
+                $ref: "#/components/schemas/Board"
               example:
                 status: "ok"
                 board:
-                - [ true, false, false, true, true, true, true, false, false, false ]
-                - [ true, false, false, false, false, false, false, false, false, false ]
-                - [ true, false, false, false, false, false, false, false, false, false ]
-                - [ true, true, false, false, false, false, false, false, false, false ]
-                - [ true, true, false, false, false, false, true, false, false, false ]
-                - [ false, true, false, false, false, false, true, false, false, false ]
-                - [ false, true, true, false, false, false, true, false, false, false ]
-                - [ false, false, false, false, false, false, false, false, false, false ]
-                - [ false, false, false, false, false, false, false, false, false, false ]
-                - [ false, false, false, false, false, false, false, false, false, false ]
+                  - [
+                      true,
+                      false,
+                      false,
+                      true,
+                      true,
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
       security:
         - gameId: []
         - playerToken: []
+  /game/getBoard:
+    get:
+      tags:
+        - game
+      summary: Gets the board of this player
+      operationId: getBoard
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Board"
+              example:
+                status: "ok"
+                board:
+                  - [
+                      true,
+                      false,
+                      false,
+                      true,
+                      true,
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      true,
+                      true,
+                      false,
+                      false,
+                      false,
+                      true,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+                  - [
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                      false,
+                    ]
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+  /game/getBoardDimensions:
+    get:
+      tags:
+        - game
+      summary: Gets the dimensions of the board
+      operationId: getBoardDimensions
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  width:
+                    type: integer
+                    example: 10
+                  height:
+                    type: integer
+                    example: 10
+              example:
+                status: "ok"
+                width: 10
+                height: 10
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+  /game/getGuesses:
+    get:
+      tags:
+        - game
+      summary: Gets the guesses of this player
+      operationId: getGuesses
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  guesses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Guess"
+              example:
+                status: "ok"
+                guesses:
+                  - x: 0
+                    y: 0
+                    hit: true
+                  - x: 1
+                    y: 0
+                    hit: false
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+  /game/getOpponentsGuesses:
+    get:
+      tags:
+        - game
+      summary: Gets the guesses of the opponent
+      operationId: getOpponentsGuesses
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  guesses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Guess"
+              example:
+                status: "ok"
+                guesses:
+                  - x: 0
+                    y: 0
+                    hit: true
+                  - x: 1
+                    y: 0
+                    hit: false
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+  /game/guess:
+    post:
+      tags:
+        - game
+      summary: Guesses a position on the board
+      operationId: guess
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                x:
+                  type: integer
+                  example: 0
+                y:
+                  type: integer
+                  example: 0
+            example:
+              x: 0
+              y: 0
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  result:
+                    type: string
+                    example: "hit"
+                    enum:
+                      - hit
+                      - miss
+                      - win
+                  winner:
+                    type: number
+                    example: 2
+                    enum:
+                      - 1
+                      - 2
+                      - null
+                    nullable: true
+              examples:
+                hit:
+                  value:
+                    status: "ok"
+                    result: "hit"
+                    winner: null
+                miss:
+                  value:
+                    status: "ok"
+                    result: "miss"
+                    winner: null
+                win:
+                  value:
+                    status: "ok"
+                    result: "win"
+                    winner: 1
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+  /game/quit:
+    get:
+      tags:
+        - game
+      summary: Quits the game, forfeits the game if not over and clears auth cookies
+      operationId: quit
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+              example:
+                status: "ok"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+
 components:
   securitySchemes:
     gameId:
@@ -251,19 +773,12 @@ components:
       in: cookie
       name: token
   schemas:
-    Ships:
-      minLength: 5
-      maxLength: 5
-      type: array
-      items:
-        $ref: "#/components/schemas/Ship"
-      
     Ship:
       type: object
       properties:
         id:
           type: string
-        x: 
+        x:
           type: integer
         y:
           type: integer
@@ -274,3 +789,21 @@ components:
             - vertical
         size:
           type: integer
+    Board:
+      type: array
+      items:
+        type: array
+        items:
+          type: boolean
+    Guess:
+      type: object
+      properties:
+        x:
+          type: integer
+        y:
+          type: integer
+        result:
+          type: string
+          enum:
+            - hit
+            - miss
