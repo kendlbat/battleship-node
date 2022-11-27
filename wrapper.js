@@ -115,6 +115,15 @@ class ServerManager {
             // Read the config file
             let config = JSON.parse(fs.readFileSync(configFile, "utf-8"));
             options = { ...config, ...options };
+        } else {
+            if (!options.contentTypes)
+                options.contentTypes = DEFAULTmimeTypesForFileExtension;
+            if (!options.fallbackMimeType)
+                options.fallbackMimeType = DEFAULTfallbackMimeType;
+            if (!options.allowDirectoryListing)
+                options.allowDirectoryListing = false;
+            if (!options.indexPages)
+                options.indexPages = ["index.html", "index.htm"];
         }
 
         this.paths = {};
@@ -334,6 +343,9 @@ class Requestable {
                     mimeTypeByFileExtension[ext] = this.registeredTo.config.contentTypes[ext];
                 });
             }
+            else{
+                mimeTypeByFileExtension = {...DEFAULTmimeTypesForFileExtension};
+            }
     
             if (this.registeredTo?.config?.fallbackMimeType) {
                 fallbackMimeType = this.registeredTo.config.fallbackMimeType || "application/octet-stream";
@@ -394,7 +406,12 @@ class Requestable {
                     }
 
                     if (indexPage) {
-                        res.write(fs.readFileSync(filepath + "/" + indexPage));
+                        // Redirect to index page
+                        res.writeHead(302, {
+                            Location: req.url + "/" + indexPage
+                        });
+                        res.end();
+                        return;
                     } else {
                         if (!this.registeredTo?.config?.allowDirectoryListing) {
                             res.write("403 - Directory listing not allowed!");
@@ -441,7 +458,7 @@ class Requestable {
                 } else if (stats.isFile()) {
                     // Get file length in bytes
 
-                    res.writeHead(200, { "Content-Type": mimeTypeByFileExtension[filepath.split(".").pop()] || "applicaton/octet", "Content-Length": stats.size, "Last-Modified": stats.mtime.toUTCString() });
+                    res.writeHead(200, { "Content-Type": mimeTypeByFileExtension[filepath.split(".").pop()] || "applicaton/octet-stream", "Content-Length": stats.size, "Last-Modified": stats.mtime.toUTCString() });
                     res.write(fs.readFileSync(filepath));
                 }
             }

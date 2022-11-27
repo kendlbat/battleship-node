@@ -6,6 +6,7 @@ DEFAULT_HEIGHT = 10
 
 class BattleshipGame {
     static VESSELS = [
+    
         {
             id: 'carrier',
             size: 5
@@ -35,8 +36,8 @@ class BattleshipGame {
 }
 
 class BattleshipPlayer {
-    constructor() {
-        this.board = new BattleshipBoard();
+    constructor(boardWidth = DEFAULT_WIDTH, boardHeight = DEFAULT_HEIGHT) {
+        this.board = new BattleshipBoard(boardWidth, boardHeight);
     }
 
 
@@ -97,6 +98,17 @@ class BattleshipBoard {
      * @returns {boolean} Whether the ship was successfully placed on the board
      */
     placeShip(ship) {
+        
+
+        if (String(ship.orientation).toLowerCase() == 'horizontal') {
+            ship.orientation = BattleshipOrientation.HORIZONTAL;
+        } else if (String(ship.orientation).toLowerCase() == 'vertical') {
+            ship.orientation = BattleshipOrientation.VERTICAL;
+        }
+
+        if (!BattleshipOrientation.getValidity(ship.orientation))
+            throw new Error('Invalid orientation');
+
         if (ship.x < 0 || ship.y < 0)
             return false;
         if (ship.x >= this.width || ship.y >= this.height)
@@ -106,11 +118,13 @@ class BattleshipBoard {
         if (ship.orientation === BattleshipOrientation.VERTICAL && ship.y + ship.size > this.height)
             return false;
 
-        for (let otherShip in this.ships)
-            if (otherShip.overlapsWith(ship))
+        let shipObj = new BattleshipVessel(ship.x, ship.y, ship.orientation, ship.size, ship.id);
+
+        for (let otherShip of this.ships)
+            if (otherShip.overlapsWith(shipObj))
                 return false;
 
-        this.ships.push(ship);
+        this.ships.push(shipObj);
         return true;
     }
 
@@ -127,7 +141,7 @@ class BattleshipBoard {
         if (x >= this.width || y >= this.height)
             throw new Error('Coordinates out of bounds');
 
-        for (let ship in this.ships)
+        for (let ship of this.ships)
             if (ship.containsPoint(x, y))
                 return true;
         return false;
@@ -154,7 +168,7 @@ class BattleshipBoard {
      * @param {BattleshipVessel[]} vessels 
      */
     placeVessels(vessels) {
-        for (let vessel in vessels)
+        for (let vessel of vessels)
             if (!this.placeShip(vessel)) {
                 this.ships = [];
                 return false;
@@ -188,15 +202,6 @@ class BattleshipVessel {
         this.orientation = orientation || BattleshipOrientation.HORIZONTAL;
         this.size = size || 0;
         this.id = id || "n/a";
-    }
-
-    /**
-     * 
-     * @param {{}} preset 
-     * @returns {BattleshipVessel}
-     */
-    static fromPreset(preset) {
-        return new BattleshipVessel(preset.position, preset.orientation, preset.size, preset.id);
     }
 
     /**
