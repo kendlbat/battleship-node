@@ -6,6 +6,7 @@ DEFAULT_HEIGHT = 10
 
 class BattleshipGame {
     static VESSELS = [
+    
         {
             id: 'carrier',
             size: 5
