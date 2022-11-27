@@ -334,6 +334,9 @@ class Requestable {
                     mimeTypeByFileExtension[ext] = this.registeredTo.config.contentTypes[ext];
                 });
             }
+            else{
+                mimeTypeByFileExtension = {...DEFAULTmimeTypesForFileExtension};
+            }
     
             if (this.registeredTo?.config?.fallbackMimeType) {
                 fallbackMimeType = this.registeredTo.config.fallbackMimeType || "application/octet-stream";
@@ -441,7 +444,7 @@ class Requestable {
                 } else if (stats.isFile()) {
                     // Get file length in bytes
 
-                    res.writeHead(200, { "Content-Type": mimeTypeByFileExtension[filepath.split(".").pop()] || "applicaton/octet", "Content-Length": stats.size, "Last-Modified": stats.mtime.toUTCString() });
+                    res.writeHead(200, { "Content-Type": mimeTypeByFileExtension[filepath.split(".").pop()] || "application/octet", "Content-Length": stats.size, "Last-Modified": stats.mtime.toUTCString() });
                     res.write(fs.readFileSync(filepath));
                 }
             }
