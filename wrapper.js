@@ -334,6 +334,9 @@ class Requestable {
                     mimeTypeByFileExtension[ext] = this.registeredTo.config.contentTypes[ext];
                 });
             }
+            else{
+                mimeTypeByFileExtension = {...DEFAULTmimeTypesForFileExtension};
+            }
     
             if (this.registeredTo?.config?.fallbackMimeType) {
                 fallbackMimeType = this.registeredTo.config.fallbackMimeType || "application/octet-stream";
