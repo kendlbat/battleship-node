@@ -35,8 +35,8 @@ class BattleshipGame {
 }
 
 class BattleshipPlayer {
-    constructor() {
-        this.board = new BattleshipBoard();
+    constructor(boardWidth = DEFAULT_WIDTH, boardHeight = DEFAULT_HEIGHT) {
+        this.board = new BattleshipBoard(boardWidth, boardHeight);
     }
 
 
@@ -97,6 +97,17 @@ class BattleshipBoard {
      * @returns {boolean} Whether the ship was successfully placed on the board
      */
     placeShip(ship) {
+        
+
+        if (String(ship.orientation).toLowerCase() == 'horizontal') {
+            ship.orientation = BattleshipOrientation.HORIZONTAL;
+        } else if (String(ship.orientation).toLowerCase() == 'vertical') {
+            ship.orientation = BattleshipOrientation.VERTICAL;
+        }
+
+        if (!BattleshipOrientation.getValidity(ship.orientation))
+            throw new Error('Invalid orientation');
+
         if (ship.x < 0 || ship.y < 0)
             return false;
         if (ship.x >= this.width || ship.y >= this.height)
@@ -110,7 +121,7 @@ class BattleshipBoard {
             if (otherShip.overlapsWith(ship))
                 return false;
 
-        this.ships.push(ship);
+        this.ships.push(new BattleshipVessel(ship.x, ship.y, ship.orientation, ship.size, ship.id));
         return true;
     }
 
@@ -188,15 +199,6 @@ class BattleshipVessel {
         this.orientation = orientation || BattleshipOrientation.HORIZONTAL;
         this.size = size || 0;
         this.id = id || "n/a";
-    }
-
-    /**
-     * 
-     * @param {{}} preset 
-     * @returns {BattleshipVessel}
-     */
-    static fromPreset(preset) {
-        return new BattleshipVessel(preset.position, preset.orientation, preset.size, preset.id);
     }
 
     /**
