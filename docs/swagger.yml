@@ -1,0 +1,276 @@
+openapi: 3.0.3
+info:
+  title: Battleship API Docs
+  description: |-
+    This is the API documentation for the Multiplayer Battleship game.
+    [kendlbat/battleship-node](https://github.com/kendlbat/battleship-node)
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  version: "1.0"
+servers:
+  - url: http://localhost:8080/api
+tags:
+  - name: game
+    description: Game API
+  - name: generic
+    description: Other API endpoints
+paths:
+  /test:
+    get:
+      tags:
+        - generic
+      summary: Check whether API is working
+      operationId: testApi
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              example:
+                status: "ok"
+                timestamp: "1669546150442"
+  /game/create:
+    get:
+      tags:
+        - game
+      summary: Creates a new game
+      description: Can not be ran while in a valid game
+      operationId: createGame
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              example:
+                status: "ok"
+                gameId: "797236-0"
+                token: "74ce5fbf48f79de0"
+        "400":
+          description: Already in a game
+  /game/join:
+    get:
+      tags:
+        - game
+      summary: Joins a game
+      operationId: joinGame
+      parameters:
+        - name: gameId
+          in: query
+          description: Game id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              example:
+                status: "ok"
+                gameId: "797236-0"
+                token: "74ce5fbf48f79de0"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              example:
+                status: 400,
+                error: "Error message"
+
+        "404":
+          description: Not found
+          content:
+            application/json:
+              example:
+                status: 404,
+                error: "Error message"
+  /game/status:
+    get:
+      tags:
+        - game
+      summary: Get current game status
+      operationId: getGameStatus
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              examples:
+                waiting:
+                  summary: Game is waiting for players to join
+                  value:
+                    status: "ok"
+                    state: "waiting"
+                    gameId: "797236-0"
+                starting:
+                  summary: Game is waiting for players to place their ships
+                  value:
+                    status: "ok"
+                    state: "starting"
+                    gameId: "797236-0"
+                playing:
+                  summary: Game is running
+                  value:
+                    status: "ok"
+                    state: "playing"
+                    gameId: "797236-0"
+                finished:
+                  summary: Game is over
+                  value:
+                    status: "ok"
+                    state: "finished"
+                    gameId: "797236-0"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404,
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+  /game/getAvailableShips:
+    get:
+      tags:
+        - game
+      summary: Gets an array of unplaced ships
+      operationId: getAvailableShips
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              example:
+                status: "ok"
+                ships:
+                  - id: "carrier"
+                    size: 5
+                  - id: "battleship"
+                    size: 4
+                  - id: "cruiser"
+                    size: 3
+                  - id: "submarine"
+                    size: 3
+                  - id: "destroyer"
+                    size: 2
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              example:
+                status: 404,
+                error: "Game not found"
+      security:
+        - gameId: []
+        - playerToken: []
+  /game/placeShips:
+    post:
+      tags:
+        - game
+      summary: Place ships on the board
+      description: The boards coordinates start at 0, 0<br>Normally, board is 10x10<br>Trying to send invalid ships will result in errors
+      operationId: placeShips
+      requestBody:
+        description: Test
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Ships"
+            example:
+              ships:
+                - x: 0
+                  y: 0
+                  orientation: "horizontal"
+                  id: "carrier"
+                  size: 5
+                - x: 0
+                  y: 3
+                  orientation: "vertical"
+                  id: "battleship"
+                  size: 4
+                - x: 3
+                  y: 1
+                  orientation: "horizontal"
+                  id: "cruiser"
+                  size: 3
+                - x: 4
+                  y: 6
+                  orientation: "horizontal"
+                  id: "submarine"
+                  size: 3
+                - x: 6
+                  y: 1
+                  orientation: "vertical"
+                  id: "destroyer"
+                  size: 2
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              example:
+                status: "ok"
+                board:
+                - [ true, false, false, true, true, true, true, false, false, false ]
+                - [ true, false, false, false, false, false, false, false, false, false ]
+                - [ true, false, false, false, false, false, false, false, false, false ]
+                - [ true, true, false, false, false, false, false, false, false, false ]
+                - [ true, true, false, false, false, false, true, false, false, false ]
+                - [ false, true, false, false, false, false, true, false, false, false ]
+                - [ false, true, true, false, false, false, true, false, false, false ]
+                - [ false, false, false, false, false, false, false, false, false, false ]
+                - [ false, false, false, false, false, false, false, false, false, false ]
+                - [ false, false, false, false, false, false, false, false, false, false ]
+      security:
+        - gameId: []
+        - playerToken: []
+components:
+  securitySchemes:
+    gameId:
+      type: apiKey
+      in: cookie
+      name: gameId
+    playerToken:
+      type: apiKey
+      in: cookie
+      name: token
+  schemas:
+    Ships:
+      minLength: 5
+      maxLength: 5
+      type: array
+      items:
+        $ref: "#/components/schemas/Ship"
+      
+    Ship:
+      type: object
+      properties:
+        id:
+          type: string
+        x: 
+          type: integer
+        y:
+          type: integer
+        orientation:
+          type: string
+          enum:
+            - horizontal
+            - vertical
+        size:
+          type: integer
