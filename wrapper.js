@@ -115,6 +115,15 @@ class ServerManager {
             // Read the config file
             let config = JSON.parse(fs.readFileSync(configFile, "utf-8"));
             options = { ...config, ...options };
+        } else {
+            if (!options.contentTypes)
+                options.contentTypes = DEFAULTmimeTypesForFileExtension;
+            if (!options.fallbackMimeType)
+                options.fallbackMimeType = DEFAULTfallbackMimeType;
+            if (!options.allowDirectoryListing)
+                options.allowDirectoryListing = false;
+            if (!options.indexPages)
+                options.indexPages = ["index.html", "index.htm"];
         }
 
         this.paths = {};
@@ -394,7 +403,12 @@ class Requestable {
                     }
 
                     if (indexPage) {
-                        res.write(fs.readFileSync(filepath + "/" + indexPage));
+                        // Redirect to index page
+                        res.writeHead(302, {
+                            Location: req.url + "/" + indexPage
+                        });
+                        res.end();
+                        return;
                     } else {
                         if (!this.registeredTo?.config?.allowDirectoryListing) {
                             res.write("403 - Directory listing not allowed!");

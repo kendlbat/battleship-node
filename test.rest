@@ -6,6 +6,10 @@ GET http://localhost:8080/api/game/create
 
 ###
 
+GET http://localhost:8080/api/game/join?gameId=118565-0
+
+###
+
 GET http://localhost:8080/api/game/status
 
 ###

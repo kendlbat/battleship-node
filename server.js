@@ -4,6 +4,8 @@ const apiRouter = require("./api");
 let server = new ServerManager();
 
 server.register(Requestable.fromStaticFolder("./public", "/static"));
+server.register(Requestable.fromStaticFolder("./docs", "/docs"));
+
 
 server.registerRouter(apiRouter, "/api");
 

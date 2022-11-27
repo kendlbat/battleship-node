@@ -26,12 +26,13 @@ function getRequestBody(req) {
     return new Promise((resolve, reject) => {
         let body = "";
 
-        if (req["Content-Type"] !== "application/json")
+        if (req.headers["content-type"] !== "application/json")
             reject("Invalid content type");
 
         req.on("data", chunk => body += chunk);
         req.on("end", () => {
             try {
+                console.log(body);
                 resolve(JSON.parse(body));
             } catch (err) {
                 reject(err);
@@ -77,19 +78,19 @@ function getCookies(req) {
 function getGameFromRequest(req, res) {
     let cookies = getCookies(req);
     if (!cookies || !cookies["gameId"]) {
-        sendError(400, "Game id not specified", res);
+        sendJSONError(400, "Game id not specified", res);
         return undefined;
     }
 
     if (!games[cookies["gameId"]]) {
-        sendError(404, "Game not found", res);
+        sendJSONError(404, "Game not found", res);
         return undefined;
     }
 
     let game = games[cookies["gameId"]];
 
     if (!game.p1 === cookies["token"] || !game.p2 === cookies["token"]) {
-        sendError(403, "Not authorized", res);
+        sendJSONError(403, "Not authorized", res);
         return undefined;
     }
 
@@ -108,7 +109,7 @@ function whichPlayer(req, res, game) {
         return 1;
     if (game.p2 === getCookies(req)["token"])
         return 2;
-    sendError(403, "Not authorized", res);
+    sendJSONError(403, "Not authorized", res);
     return undefined;
 }
 
@@ -209,40 +210,25 @@ gameRouter.register(new Requestable(async (req, res) => {
 }, "GET", "/join"));
 
 /**
- * GET /api/game/status
- * Gets the status of a game
+ * GET /api/game/getGameState
+ * 
+ * NOTE: This is the ONE endpoint that should be polled continuously
+ * @todo Add rate limiting to THE OTHER ENDPOINTS (not this one)
  */
-gameRouter.register(new Requestable(async (req, res) => {
-    let cookies = getCookies(req);
+ gameRouter.register(new Requestable(async (req, res) => {
+    let game = getGameFromRequest(req, res);
+    if (!game) return;
 
-    if (!cookies || !cookies["gameId"] || !cookies["token"]) {
-        sendJSONError(400, "Missing cookies", res);
-        return;
-    }
+    let player = whichPlayer(req, res, game);
+    if (!player) return;
 
-    let gameId = cookies["gameId"];
-    let token = cookies["token"];
-
-    if (!games[gameId]) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
-    if (games[gameId].p1 !== token && games[gameId].p2 !== token) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
-
-    let game = games[gameId].game;
+    console.log(game);
 
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
         status: "ok",
-        game: {
-            status: games[gameId].status,
-            id: gameId
-        }
+        state: game.status
     }));
-
 }, "GET", "/status"));
 
 /**
@@ -251,16 +237,10 @@ gameRouter.register(new Requestable(async (req, res) => {
  */
 gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
-    if (!game) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
+    if (!game) return;
 
     let player = whichPlayer(req, res, game);
-    if (!player) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
+    if (!player) return;
 
     if (game.status !== "starting") {
         sendJSONError(400, "Game not ready", res);
@@ -288,23 +268,25 @@ gameRouter.register(new Requestable(async (req, res) => {
  */
 gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
-    if (!game) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
+    if (!game) return;
 
     let player = whichPlayer(req, res, game);
-    if (!player) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
+    if (!player) return;
 
     if (game.status !== "starting") {
         sendJSONError(400, "Game not in correct state", res);
         return;
     }
 
-    let body = await getBody(req);
+    let body;
+
+    try {
+        body = await getRequestBody(req);
+    } catch (e) {
+        console.error(e);
+        sendJSONError(400, "Body invalid or missing", res);
+        return;
+    }
 
     if (!body || !body.ships) {
         sendJSONError(400, "Malformed request", res);
@@ -313,12 +295,13 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     let ships = body.ships;
 
-    ships.forEach(ship => {
-        if (!ship || !ship.x || !ship.y || !ship.orientation || !ship.id) {
+    for (let ship of ships) {
+        console.log(ship);
+        if (!ship || Number.isNaN(ship.x) || Number.isNaN(ship.y) || !ship.orientation || !ship.id || Number.isNaN(ship.size)) {
             sendJSONError(400, "Malformed request", res);
             return;
         }
-    });
+    };
 
     let success;
     // ships has to include every ship from getAvailableShips()
@@ -371,16 +354,10 @@ gameRouter.register(new Requestable(async (req, res) => {
  */
 gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
-    if (!game) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
+    if (!game) return;
 
     let player = whichPlayer(req, res, game);
-    if (!player) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
+    if (!player) return;
 
     if (game.status !== "playing") {
         sendJSONError(400, "Game not in correct state", res);
@@ -396,21 +373,40 @@ gameRouter.register(new Requestable(async (req, res) => {
 }, "GET", "/getBoard"));
 
 /**
+ * GET /api/game/getBoardDimensions
+ */
+gameRouter.register(new Requestable(async (req, res) => {
+    let game = getGameFromRequest(req, res);
+    if (!game) return;
+
+    let player = whichPlayer(req, res, game);
+    if (!player) return;
+
+    if (game.status !== "playing" && game.status !== "starting" && game.status !== "finished") {
+        sendJSONError(400, "Game not in correct state", res);
+        return;
+    }
+
+    let dimensions = game.game.player1.board.getDimensions();
+    
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+        status: "ok",
+        dimensions: dimensions
+    }));
+}, "GET", "/getBoardDimensions"));
+
+/**
  * GET /api/game/getGuesses
  * Gets the guesses for the opponents board
  */
 gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
-    if (!game) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
+    if (!game) return;
 
     let player = whichPlayer(req, res, game);
-    if (!player) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
+    if (!player) return;
 
 
     if (game.status !== "playing") {
@@ -439,16 +435,10 @@ gameRouter.register(new Requestable(async (req, res) => {
  */
 gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
-    if (!game) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
+    if (!game) return;
 
     let player = whichPlayer(req, res, game);
-    if (!player) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
+    if (!player) return;
 
     if (game.status !== "playing") {
         sendJSONError(400, "Game not in correct state", res);
@@ -470,54 +460,29 @@ gameRouter.register(new Requestable(async (req, res) => {
 }, "GET", "/getOpponentsGuesses"));
 
 /**
- * GET /api/game/getGameState
- * 
- * NOTE: This is the ONE endpoint that should be polled continuously
- * @todo Add rate limiting to THE OTHER ENDPOINTS (not this one)
- */
-gameRouter.register(new Requestable(async (req, res) => {
-    let game = getGameFromRequest(req, res);
-    if (!game) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
-
-    let player = whichPlayer(req, res, game);
-    if (!player) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
-
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({
-        status: "ok",
-        state: game.status
-    }));
-}, "GET", "/getGameState"));
-
-/**
  * POST /api/game/guess
  * Guesses a position on the opponents board
  */
 gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
-    if (!game) {
-        sendJSONError(404, "Game not found", res);
-        return;
-    }
+    if (!game) return;
 
     let playerNumber = whichPlayer(req, res, game);
-    if (!playerNumber) {
-        sendJSONError(403, "Invalid token", res);
-        return;
-    }
+    if (!player) return;
 
     if (game.status !== "playing") {
         sendJSONError(400, "Game not in correct state", res);
         return;
     }
 
-    let body = await getBody(req);
+    let body;
+
+    try {
+        body = await getRequestBody(req);
+    } catch (e) {
+        sendJSONError(400, "Body invalid or missing", res);
+        return;
+    }
 
     if (!body || !body.x || !body.y) {
         sendJSONError(400, "Malformed request", res);
@@ -572,6 +537,38 @@ gameRouter.register(new Requestable(async (req, res) => {
         }));
     }
 }, "POST", "/guess"));
+
+/**
+ * GET /api/game/quit
+ * Quits the game
+ */
+gameRouter.register(new Requestable(async (req, res) => {
+    let game = getGameFromRequest(req, res);
+    if (!game) return;
+
+    let player = whichPlayer(req, res, game);
+    if (!player) return;
+
+    if (game.status !== "finished") {
+        // Forfeit game
+        game.status = "finished";
+        game.winner = player === 1 ? 2 : 1;
+    }
+
+    // Clear cookies
+    res.setHeader();
+    res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Set-Cookie": [
+            "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/",
+            "gameId=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
+        ]
+    });
+    res.end(JSON.stringify({
+        status: "ok"
+    }));
+}, "GET", "/quit"));
+
 
 
 module.exports = apiRouter;
