@@ -123,10 +123,7 @@ apiRouter.registerRouter(gameRouter, "/game");
 }; */
 
 // When root is requested, redirect to docs
-apiRouter.register(new Requestable((req, res) => {
-    res.writeHead(302, { "Location": "/docs/swagger/index.html" });
-    res.end();
-}, "GET", "/"));
+apiRouter.register(Requestable.redirect("/api", "/docs/swagger/index.html"));
 
 apiRouter.register(new Requestable((req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });

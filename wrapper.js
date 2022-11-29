@@ -537,6 +537,13 @@ class Requestable {
         }, requestable.method, requestable.path);
     }
 
+    static redirect(src, dest, method = "GET", code = 301) {
+        return new Requestable((req, res) => {
+            res.writeHead(code, { "Location": dest });
+            res.end();
+        }, method, src);
+    }
+
     setServerManager(sm) {
         this.registeredTo = sm;
     } 
