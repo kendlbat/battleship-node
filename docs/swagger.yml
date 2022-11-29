@@ -27,9 +27,20 @@ paths:
           description: Successful operation
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the API
+                    example: OK
+                  timestamp:
+                    type: number
+                    description: Timestamp of the request in Unix millis
+                    example: 1669546150442
               example:
                 status: "ok"
-                timestamp: "1669546150442"
+                timestamp: 1669546150442
   /game/create:
     get:
       tags:
@@ -42,6 +53,23 @@ paths:
           description: successful operation
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the API
+                    example: "ok"
+                  gameId:
+                    type: string
+                    description: ID of the game
+                    example: "797236-0"
+                    pattern: "^[0-9]{6}-[0-9]$"
+                  token:
+                    type: string
+                    description: Access token of the player
+                    example: "74ce5fbf48f79de0"
+                    pattern: "^[0-9a-f]{16}$"
               example:
                 status: "ok"
                 gameId: "797236-0"
@@ -61,11 +89,29 @@ paths:
           required: true
           schema:
             type: string
+            pattern: "^[0-9]{6}-[0-9]$"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the API
+                    example: "ok"
+                  gameId:
+                    type: string
+                    description: ID of the game
+                    example: "797236-0"
+                    pattern: "^[0-9]{6}-[0-9]$"
+                  token:
+                    type: string
+                    description: Access token of the player
+                    example: "74ce5fbf48f79de0"
+                    pattern: "^[0-9a-f]{16}$"
               example:
                 status: "ok"
                 gameId: "797236-0"
@@ -74,6 +120,17 @@ paths:
           description: Bad request
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 400
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 400,
                 error: "Error message"
@@ -82,6 +139,17 @@ paths:
           description: Not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Error message"
@@ -96,6 +164,26 @@ paths:
           description: successful operation
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the API
+                    example: "ok"
+                  gameId:
+                    type: string
+                    description: ID of the game
+                    example: "797236-0"
+                    pattern: "^[0-9]{6}-[0-9]$"
+                  state:
+                    type: string
+                    description: State of the game
+                    enum:
+                      - waiting
+                      - starting
+                      - playing
+                      - finished
               examples:
                 waiting:
                   summary: Game is waiting for players to join
@@ -125,6 +213,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Not authorized"
               example:
                 status: 403
                 error: "Invalid token"
@@ -132,6 +231,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
@@ -149,6 +259,28 @@ paths:
           description: successful operation
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the API
+                    example: "ok"
+                  ships:
+                    type: array
+                    description: Array of unplaced ships
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: ID of the ship
+                          example: "carrier"
+                        length:
+                          type: number
+                          description: Length of the ship
+                          example: 5
+                          minimum: 1
               example:
                 status: "ok"
                 ships:
@@ -166,6 +298,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
               example:
                 status: 403
                 error: "Invalid token"
@@ -173,6 +316,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
@@ -227,7 +381,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Board"
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the API
+                    example: "ok"
+                  board:
+                    $ref: "#/components/schemas/Board"
               example:
                 status: "ok"
                 board:
@@ -351,6 +512,60 @@ paths:
                       false,
                       false,
                     ]
+        "400":
+          description: Malfomed request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 400
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid ship"
+              example:
+                status: 400
+                error: "Malformed request"
+        "403":
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
+              example:
+                status: 403
+                error: "Invalid token"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
+              example:
+                status: 404
+                error: "Game not found"
       security:
         - gameId: []
         - playerToken: []
@@ -366,7 +581,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Board"
+                type: object
+                properties:
+                  status:
+                    type: string
+                    description: Status of the API
+                    example: "ok"
+                  board:
+                    $ref: "#/components/schemas/Board"
               example:
                 status: "ok"
                 board:
@@ -494,6 +716,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
               example:
                 status: 403
                 error: "Invalid token"
@@ -501,6 +734,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
@@ -538,6 +782,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
               example:
                 status: 403
                 error: "Invalid token"
@@ -545,6 +800,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
@@ -585,6 +851,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
               example:
                 status: 403
                 error: "Invalid token"
@@ -592,6 +869,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
@@ -632,6 +920,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
               example:
                 status: 403
                 error: "Invalid token"
@@ -639,6 +938,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
@@ -660,9 +970,11 @@ paths:
                 x:
                   type: integer
                   example: 0
+                  minimum: 0
                 y:
                   type: integer
                   example: 0
+                  minimum: 0
             example:
               x: 0
               y: 0
@@ -712,6 +1024,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
               example:
                 status: 403
                 error: "Invalid token"
@@ -719,6 +1042,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
@@ -748,6 +1082,17 @@ paths:
           description: Not authorized
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 403
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Invalid token"
               example:
                 status: 403
                 error: "Invalid token"
@@ -755,6 +1100,17 @@ paths:
           description: Game not found
           content:
             application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 404
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
               example:
                 status: 404
                 error: "Game not found"
