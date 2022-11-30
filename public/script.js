@@ -4,12 +4,21 @@ const headline = 'BATTLESHIP';
 
 const loginData = {
     'create game': () => {
+        if(getCookie('gameId')){
+            buildCreateGameUI({'gameId': getCookie('gameId'), 'token': getCookie('token')});
+            return null;
+        }
         fetch('../../api/game/create')
             .then((response) => {
                 response.json()
-                    .then(gameObject => {
-                        if(gameObject.status !== 'ok')
+                    .then((gameObject) => {
+                        if(gameObject.status !== 'ok') {
                             return false;
+                        }
+
+                        document.cookie = `gameId=${gameObject.gameId}`;
+                        document.cookie = `token=${gameObject.token}`;
+
                         // gameObject.gameId
                         // gameObject.token
 
@@ -18,7 +27,11 @@ const loginData = {
             });
     },
     'join game': () => {},
-    'credits': () => {}
+    'credits': () => {},
+    'DEBUG_RESET_LOCAL_COOKIES': () => {
+        document.cookie = 'gameId=;';
+        document.cookie = 'token=;';
+    }
 }
 
 async function copyrightLog() {
@@ -91,10 +104,17 @@ function buildCreateGameUI(gameObject){
         );
     }
     document.body.appendChild(table);
-    buildLoginUI({'start game': () => {}})
+    buildLoginUI({'start game': () => {
+            fetch('../../api/game/start');
+        }});
 }
 
 function buildGameBoard(){
 
 }
 
+function getCookie(name){
+    return document.cookie.split(';')
+        ?.find(s => s.split('=')[0]?.trim() === name)
+        ?.split('=')[1].trim();
+}
