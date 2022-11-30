@@ -98,8 +98,6 @@ class BattleshipBoard {
      * @returns {boolean} Whether the ship was successfully placed on the board
      */
     placeShip(ship) {
-        
-
         if (String(ship.orientation).toLowerCase() == 'horizontal') {
             ship.orientation = BattleshipOrientation.HORIZONTAL;
         } else if (String(ship.orientation).toLowerCase() == 'vertical') {
