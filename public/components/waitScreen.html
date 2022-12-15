@@ -1,0 +1,9 @@
+<script>
+    async function main() {
+        let status = await window.APIHandler.status();
+        console.log(status);
+        document.querySelector("#waitScreenComp-code").innerText = status.gameId;
+    }
+    main();
+</script>
+<h1 id="waitScreenComp-code">Loading...</h1>
