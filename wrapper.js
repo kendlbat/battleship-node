@@ -147,8 +147,8 @@ class ServerManager {
 
         if (requestable.path instanceof RegExp) {
             sub = "REGEXP " + requestable.path;
-        } else if (requestable.path.match(/.*@@@.*/g)) {
-            if (requestable.path.match(/.*@@@.*/g).length != 1)
+        } else if (requestable.path.match(/[^@]*@@@.*/g)) {
+            if (requestable.path.match(/[^@]*@@@.*/g).length != 1)
                 throw new Error("Too many @@@ in requestable path");
             sub = requestable.path.split("?")[0].split("#")[0];
         } else {
