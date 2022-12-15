@@ -3,6 +3,18 @@
         let status = await window.APIHandler.status();
         console.log(status);
         document.querySelector("#waitScreenComp-code").innerText = status.gameId;
+
+        setInterval(() => {
+            window.APIHandler.status().then((status) => {
+                if (status.status == "starting") {
+                    window.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+                } else if (status.status == "playing") {
+                    window.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+                } else if (status.status == "finished") {
+                    window.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+                }
+            });
+        }, window.pollingInterval);
     }
     main();
 </script>

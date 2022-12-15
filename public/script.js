@@ -46,5 +46,7 @@ async function main() {
 
 }
 
+window.pollingInterval = 2000;
 window.loadComponent = loadComponent;
+
 document.addEventListener("DOMContentLoaded", () => main());
