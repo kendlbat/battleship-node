@@ -4,18 +4,30 @@
         console.log(status);
         document.querySelector("#waitScreenComp-code").innerText = status.gameId;
 
-        setInterval(() => {
+        window.statusPoll = () => {
             window.APIHandler.status().then((status) => {
-                if (status.status == "starting") {
+                console.log(status);
+                if (status.state == "starting") {
+                    window.statusPoll = () => undefined;
                     window.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
-                } else if (status.status == "playing") {
+                } else if (status.state == "playing") {
+                    window.statusPoll = () => undefined;
                     window.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
-                } else if (status.status == "finished") {
+                } else if (status.state == "finished") {
+                    window.statusPoll = () => undefined;
                     window.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
                 }
             });
-        }, window.pollingInterval);
+        }
     }
+
+    document.querySelector("#waitScreenComp-leave").addEventListener("click", () => {
+        window.APIHandler.quit().then(() => {
+            window.loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        });
+    });
+
     main();
 </script>
 <h1 id="waitScreenComp-code">Loading...</h1>
+<button type="button" id="waitScreenComp-leave">Leave</button>

@@ -20,6 +20,7 @@ function postJSON(url, body) {
             headers: {
                 "Content-Type": "application/json"
             },
+            cache: "no-store",
             body: JSON.stringify(body)
         }).then(resolve).catch(reject);
     });
@@ -31,7 +32,7 @@ function postJSON(url, body) {
  */
 export function createGame() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/create").then((res) => {
+        fetch("/api/game/create", { cache: "no-store" }).then((res) => {
             res.json()
                 .then(resolve)
                 .catch(reject);
@@ -46,7 +47,7 @@ export function createGame() {
  */
 export function joinGame(id) {
     return new Promise((resolve, reject) => {
-        fetch(generateGETUrl("/api/game/join", { gameId: id })).then((res) => {
+        fetch(generateGETUrl("/api/game/join", { gameId: id }), { cache: "no-store" }).then((res) => {
             if (res.status == 200)
                 resolve();
             else
@@ -61,7 +62,8 @@ export function joinGame(id) {
  */
 export function status() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/status").then((res) => {
+        fetch("/api/game/status", { cache: "no-store" }).then((res) => {
+            console.warn(res);
             res.json()
                 .then(resolve)
                 .catch(reject);
@@ -75,7 +77,7 @@ export function status() {
  */
 export function getAvailableShips() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/getAvailableShips").then((res) => {
+        fetch("/api/game/getAvailableShips", { cache: "no-store" }).then((res) => {
             res.json()
                 .then(resolve)
                 .catch(reject);
@@ -102,7 +104,7 @@ export function placeShips(ships) {
  */
 export function getBoard() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/getBoard")
+        fetch("/api/game/getBoard", { cache: "no-store" })
             .then((res) => {
                 res.json()
                     .then(resolve)
@@ -118,7 +120,7 @@ export function getBoard() {
  */
 export function getBoardDimensions() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/getBoardDimensions")
+        fetch("/api/game/getBoardDimensions", { cache: "no-store" })
             .then((res) => {
                 res.json()
                     .then(resolve)
@@ -134,7 +136,7 @@ export function getBoardDimensions() {
  */
 export function getMyGuesses() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/getGuesses")
+        fetch("/api/game/getGuesses", { cache: "no-store" })
             .then((res) => {
                 res.json()
                     .then(resolve)
@@ -150,7 +152,7 @@ export function getMyGuesses() {
  */
 export function getOpponentsGuesses() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/getOpponentsGuesses")
+        fetch("/api/game/getOpponentsGuesses", { cache: "no-store" })
             .then((res) => {
                 res.json()
                     .then(resolve)
@@ -180,8 +182,11 @@ export function guess(x, y) {
  */
 export function quit() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/quit")
+        fetch("/api/game/quit", { cache: "no-store" })
             .then((res) => {
+                // Remove cookies "token" and "gameId"
+                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "gameId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 res.json()
                     .then(resolve)
                     .catch(reject);

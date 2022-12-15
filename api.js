@@ -544,20 +544,20 @@ gameRouter.register(new Requestable(async (req, res) => {
  * Quits the game
  */
 gameRouter.register(new Requestable(async (req, res) => {
-    let game = getGameFromRequest(req, res);
-    if (!game) return;
+    // Get game without any checks
+    // Get cookie
+    let cookies = getCookies(req);
+    let game = games[cookies["gameId"]];
 
-    let player = whichPlayer(req, res, game);
-    if (!player) return;
-
-    if (game.status !== "finished") {
-        // Forfeit game
-        game.status = "finished";
-        game.winner = player === 1 ? 2 : 1;
+    if (game) {
+        let player = whichPlayer(req, res, game);
+        if (player && game.status !== "finished") {
+            game.status = "finished";
+            game.winner = player === 1 ? 2 : 1;
+        }
     }
 
     // Clear cookies
-    res.setHeader();
     res.writeHead(200, {
         "Content-Type": "application/json",
         "Set-Cookie": [

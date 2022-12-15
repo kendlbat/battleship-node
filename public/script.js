@@ -33,14 +33,17 @@ async function main() {
     loadComponent("components/loadScreen.html", document.querySelector("#componentContainer"));
     let status = await APIHandler.status();
 
-    if (status.status == 400)
+    if (status.status == 400) {
         loadComponent("components/login.html", document.querySelector("#componentContainer"));
-    else if (status.status == 403) {
+    } else if (status.status == 403 || status.status == 404) {
         APIHandler.quit();
         loadComponent("components/login.html", document.querySelector("#componentContainer"));
     } else if (status.status == "ok") {
         loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
     }
+
+    window.statusPoll = () => undefined;
+    setInterval(() => window.statusPoll(), window.pollingInterval);
 
     console.log(status);
 
