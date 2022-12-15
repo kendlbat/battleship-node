@@ -209,6 +209,24 @@ paths:
                     status: "ok"
                     state: "finished"
                     gameId: "797236-0"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 400
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
+              example:
+                status: 400,
+                error: "Error message"
         "403":
           description: Not authorized
           content:

@@ -123,7 +123,7 @@ apiRouter.registerRouter(gameRouter, "/game");
 }; */
 
 // When root is requested, redirect to docs
-apiRouter.register(Requestable.redirect("/api", "/docs/swagger/index.html"));
+apiRouter.register(Requestable.redirect("/", "/docs/swagger/index.html"));
 
 apiRouter.register(new Requestable((req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -230,7 +230,8 @@ gameRouter.register(new Requestable(async (req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
         status: "ok",
-        state: game.status
+        state: game.status,
+        gameId: getCookies(req)["gameId"]
     }));
 }, "GET", "/status"));
 

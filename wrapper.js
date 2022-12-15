@@ -210,7 +210,7 @@ class ServerManager {
                 }
             }
 
-        }, "ANY", new RegExp("/?" + path + "/?.*")));
+        }, "ANY", new RegExp("^[^@]*@@@" + path + ".*$")));
     }
 
     /**
