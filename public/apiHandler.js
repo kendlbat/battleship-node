@@ -63,7 +63,6 @@ export function joinGame(id) {
 export function status() {
     return new Promise((resolve, reject) => {
         fetch("/api/game/status", { cache: "no-store" }).then((res) => {
-            console.warn(res);
             res.json()
                 .then(resolve)
                 .catch(reject);
