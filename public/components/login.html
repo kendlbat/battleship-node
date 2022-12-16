@@ -1,8 +1,5 @@
 <script>
-    var form;
-
-    form = document.querySelector("#loginComp-form");
-    form.addEventListener("submit", () => {
+    document.querySelector("#loginComp-form").addEventListener("submit", () => {
         let gameid = document.querySelector("#gameid-input").value;
         window.APIHandler.joinGame(gameid)
             .then(() => {
