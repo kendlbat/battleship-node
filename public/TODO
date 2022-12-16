@@ -1,1 +1,2 @@
 - Proper load screen
+- Create ship assets (picures) & Register filename in (game.js).BattleshipGame.VESSELS
