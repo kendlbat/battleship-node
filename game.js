@@ -6,26 +6,30 @@ DEFAULT_HEIGHT = 10
 
 class BattleshipGame {
     static VESSELS = [
-    
         {
             id: 'carrier',
-            size: 5
+            size: 5,
+            asset: 'carrier.png'
         },
         {
             id: 'battleship',
-            size: 4
+            size: 4,
+            asset: 'battleship.png'
         },
         {
             id: 'cruiser',
-            size: 3
+            size: 3,
+            asset: 'cruiser.png'
         },
         {
             id: 'submarine',
-            size: 3
+            size: 3,
+            asset: 'submarine.png'
         },
         {
             id: 'destroyer',
-            size: 2
+            size: 2,
+            asset: 'destroyer.png'
         }
     ];
 
