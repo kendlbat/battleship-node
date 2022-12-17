@@ -8,28 +8,23 @@ class BattleshipGame {
     static VESSELS = [
         {
             id: 'carrier',
-            size: 5,
-            asset: 'carrier.png'
+            size: 5
         },
         {
             id: 'battleship',
-            size: 4,
-            asset: 'battleship.png'
+            size: 4
         },
         {
             id: 'cruiser',
-            size: 3,
-            asset: 'cruiser.png'
+            size: 3
         },
         {
             id: 'submarine',
-            size: 3,
-            asset: 'submarine.png'
+            size: 3
         },
         {
             id: 'destroyer',
-            size: 2,
-            asset: 'destroyer.png'
+            size: 2
         }
     ];
 
