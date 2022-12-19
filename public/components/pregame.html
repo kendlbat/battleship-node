@@ -2,3 +2,20 @@
 This file is responsible for the "starting" status
 This is where players place their ships
 -->
+<script>
+    async function generateShipSelection(ships) {
+        for (let ship of ships) {
+            console.log(ship);
+        }
+
+    }
+
+    async function pregameCompMain() {
+        let avShips = await window.APIHandler.getAvailableShips();
+        if (avShips?.ships) {
+            let shipSel = await generateShipSelection(avShips.ships);
+        }
+    }
+
+    pregameCompMain();
+</script>

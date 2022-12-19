@@ -1,5 +1,5 @@
 <script>
-    async function main() {
+    async function waitScreenCompMain() {
         let status = await window.APIHandler.status();
         console.log(status);
         document.querySelector("#waitScreenComp-code").innerText = status.gameId;
@@ -8,13 +8,13 @@
             window.APIHandler.status().then((status) => {
                 console.log(status);
                 if (status.state == "starting") {
-                    window.statusPoll = () => undefined;
+                    window.statusPoll = () => { return undefined };
                     window.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
                 } else if (status.state == "playing") {
-                    window.statusPoll = () => undefined;
+                    window.statusPoll = () => { return undefined };
                     window.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
                 } else if (status.state == "finished") {
-                    window.statusPoll = () => undefined;
+                    window.statusPoll = () => { return undefined };
                     window.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
                 }
             });
@@ -27,7 +27,7 @@
         });
     });
 
-    main();
+    waitScreenCompMain();
 </script>
 <h1 id="waitScreenComp-code">Loading...</h1>
 <button type="button" id="waitScreenComp-leave">Leave</button>

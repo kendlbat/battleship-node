@@ -63,7 +63,6 @@ export function joinGame(id) {
 export function status() {
     return new Promise((resolve, reject) => {
         fetch("/api/game/status", { cache: "no-store" }).then((res) => {
-            console.warn(res);
             res.json()
                 .then(resolve)
                 .catch(reject);
@@ -182,11 +181,11 @@ export function guess(x, y) {
  */
 export function quit() {
     return new Promise((resolve, reject) => {
-        fetch("/api/game/quit", { cache: "no-store" })
+        fetch("/api/game/quit", { cache: "no-store", credentials: "include" })
             .then((res) => {
                 // Remove cookies "token" and "gameId"
-                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                document.cookie = "gameId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "token=del; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "gameId=del; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 res.json()
                     .then(resolve)
                     .catch(reject);

@@ -39,10 +39,18 @@ async function main() {
         APIHandler.quit();
         loadComponent("components/login.html", document.querySelector("#componentContainer"));
     } else if (status.status == "ok") {
-        loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
+        if (status.state == "starting") {
+            loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+        } else if (status.state == "playing") {
+            loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+        } else if (status.state == "finished") {
+            loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+        } else {
+            loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        }
     }
 
-    window.statusPoll = () => undefined;
+    window.statusPoll = () => { return undefined };
     setInterval(() => window.statusPoll(), window.pollingInterval);
 
     console.log(status);

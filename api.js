@@ -161,7 +161,10 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     res.writeHead(200, {
         "Content-Type": "application/json",
-        "Set-Cookie": [`gameId=${gameId}`, `token=${token}`]
+        "Set-Cookie": [
+            `gameId=${gameId}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`,
+            `token=${token}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`
+        ]
     });
     res.end(JSON.stringify({ status: "ok", gameId, token }));
 }, "GET", "/create"));
@@ -207,7 +210,10 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     res.writeHead(200, {
         "Content-Type": "application/json",
-        "Set-Cookie": [`gameId=${gameId}`, `token=${token}`]
+        "Set-Cookie": [
+            `gameId=${gameId}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`,
+            `token=${token}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`
+        ]
     });
     res.end(JSON.stringify({ status: "ok", gameId, token }));
 }, "GET", "/join"));
@@ -561,8 +567,8 @@ gameRouter.register(new Requestable(async (req, res) => {
     res.writeHead(200, {
         "Content-Type": "application/json",
         "Set-Cookie": [
-            "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/",
-            "gameId=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
+            "token=; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/",
+            "gameId=; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/"
         ]
     });
     res.end(JSON.stringify({

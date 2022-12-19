@@ -1,2 +1,2 @@
 - Proper load screen
-- Fix cookies not being deleted
+- Create ship assets (picures) & Register filename in (game.js).BattleshipGame.VESSELS
