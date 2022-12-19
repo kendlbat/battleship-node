@@ -1,12 +1,11 @@
-DEFAULT_WIDTH = 10
-DEFAULT_HEIGHT = 10
+DEFAULT_WIDTH = 8
+DEFAULT_HEIGHT = 8
 
 // X is left to right
 // Y is top to bottom
 
 class BattleshipGame {
     static VESSELS = [
-    
         {
             id: 'carrier',
             size: 5

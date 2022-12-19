@@ -356,7 +356,7 @@ paths:
       tags:
         - game
       summary: Place ships on the board
-      description: The boards coordinates start at 0, 0<br>Normally, board is 10x10<br>Trying to send invalid ships will result in errors
+      description: The boards coordinates start at 0, 0<br>Normally, board is 8x8<br>Trying to send invalid ships will result in errors
       operationId: placeShips
       requestBody:
         description: Test
@@ -788,14 +788,14 @@ paths:
                     example: "ok"
                   width:
                     type: integer
-                    example: 10
+                    example: 8
                   height:
                     type: integer
-                    example: 10
+                    example: 8
               example:
                 status: "ok"
-                width: 10
-                height: 10
+                width: 8
+                height: 8
         "403":
           description: Not authorized
           content:
