@@ -1,8 +1,23 @@
 :root {
     --bg-root: #222;
     --font-color: #fff;
+    --accent-color: rgb(132, 0, 255);
+
+    --board-cell-size: 44px;
+    --board-cell-border: 1px solid #fff;
+    --board-cell-border-radius: 3px;
+
+    --pregame-ship-placeable: rgb(3, 151, 3);
+    --pregame-ship-unplaceable: #f00;
+    --pregame-ship-placed: #00f;
+    --pregame-ship-crossing: #80f;
+
 
     background-color: var(--bg-root);
     color: var(--font-color);
+}
+
+* {
+    box-sizing: border-box;
 }
 
