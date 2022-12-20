@@ -26,38 +26,57 @@ async function loadComponent(url, parent) {
     }
 }
 
+async function statusPrint(status) {
+    if (!status?.error)
+        console.log([
+            `Status:`,
+            `  Request Status: ${status.status}`,
+            `  Game State: ${status.state}`,
+            `  Game ID: ${status.gameId}`
+        ].join("\n"));
+    else
+        console.warn([
+            `Status:`,
+            `  Request Status: ${status.status}`,
+            `  Error: ${status.error}`
+        ].join("\n"));
+}
+
 async function main() {
     copyrightLog();
     APIHandler = await import("./apiHandler.js");
-    window.APIHandler = APIHandler;
-    loadComponent("components/loadScreen.html", document.querySelector("#componentContainer"));
+    window.x.APIHandler = APIHandler;
+    x.loadComponent("components/loadScreen.html", document.querySelector("#componentContainer"));
     let status = await APIHandler.status();
 
     if (status.status == 400) {
-        loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
     } else if (status.status == 403 || status.status == 404) {
         APIHandler.quit();
-        loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
     } else if (status.status == "ok") {
         if (status.state == "starting") {
-            loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+            x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
         } else if (status.state == "playing") {
-            loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+            x.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
         } else if (status.state == "finished") {
-            loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+            x.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
         } else {
-            loadComponent("components/login.html", document.querySelector("#componentContainer"));
+            x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
         }
     }
 
     window.statusPoll = () => { return undefined };
     setInterval(() => window.statusPoll(), window.pollingInterval);
 
-    console.log(status);
+    x.statusPrint(status);
 
 }
 
-window.pollingInterval = 2000;
-window.loadComponent = loadComponent;
+// window.x contains all globally available custom functions
+window.x = {};
+window.x.pollingInterval = 2000;
+window.x.loadComponent = loadComponent;
+window.x.statusPrint = statusPrint;
 
 document.addEventListener("DOMContentLoaded", () => main());
