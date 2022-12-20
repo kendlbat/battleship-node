@@ -3,19 +3,410 @@ This file is responsible for the "starting" status
 This is where players place their ships
 -->
 <script>
-    async function generateShipSelection(ships) {
-        for (let ship of ships) {
-            console.log(ship);
+    function pregameCompScript() {
+        /**
+         * The ship which is currently selected by the player
+         * @type {HTMLElement | null}
+         */
+        let currentShip = null;
+
+        /**
+         * The ship details of the available ships
+         * @type {[{id: string, length: number}] | null}
+         */
+        let shipDetails = null;
+
+        /**
+         * The orientation of the currently selected ship
+         * @type {"horizontal" | "vertical"}
+         */
+        let shipOrientation = "horizontal";
+
+        /**
+         * The board dimensions
+         * @type {{width: number, height: number} | null}
+         */
+        let boardDims = null;
+
+        /**
+         * The last board tile the mouse was hovering over
+         * @type {{x: number, y: number} | null}
+         */
+        let lastBoardHoverLocation = null;
+
+        /**
+         * Whether the mouse is currently hovering over the board
+         * @type {boolean}
+         */
+        let isHoveringOverBoard = false;
+
+        /**
+         * Loads the ship components into the ship selection container
+         * @param {[{id: string, length: number}]} ships
+         * @returns {Promise<void>}
+         */
+        async function generateShipSelection(ships) {
+            let cont = document.querySelector("#pregameContainer #pregameShipContainer");
+            for (let ship of ships) {
+                let shipDiv = document.createElement("div");
+                shipDiv.classList.add("shipPreview");
+                shipDiv.classList.add("shipPreview-" + ship.id);
+                shipDiv.id = "shipPreview-" + ship.id;
+
+                shipDiv.addEventListener("click", (e) => {
+                    console.log("Ship: '" + ship.id + "' was clicked!");
+                    if (currentShip)
+                        currentShip.classList?.remove("selected");
+                    currentShip = shipDiv;
+                    currentShip.classList?.add("selected");
+                });
+
+                document.querySelector("#pregameContainer #pregameShipContainer").appendChild(shipDiv);
+
+                window.x.loadComponent(`components/ships/${ship.id}.html`, shipDiv);
+            }
         }
 
-    }
+        async function boardHoverShowShip(e) {
+            let coordinates;
+            if (e)
+                coordinates = e.target.id.split("-");
+            else {
+                coordinates = ["", "", `${lastBoardHoverLocation.x}`, `${lastBoardHoverLocation.y}`];
+            }
 
-    async function pregameCompMain() {
-        let avShips = await window.APIHandler.getAvailableShips();
-        if (avShips?.ships) {
-            let shipSel = await generateShipSelection(avShips.ships);
+            if (!coordinates[2] || !coordinates[3])
+                return;
+
+            // Remove all shiphover classes
+            let cells = document.querySelectorAll(".shiphover");
+            for (let cell of cells) {
+                cell.classList.remove("shiphover");
+                cell.classList.remove("shiphover-invalid");
+                cell.classList.remove("shiphover-crossing");
+            }
+
+            let x = parseInt(coordinates[2]);
+            let y = parseInt(coordinates[3]);
+
+
+            lastBoardHoverLocation = { x, y };
+
+            // console.log(`Hover at: ${x}, ${y}`);
+            currentShip = document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected");
+
+            if (currentShip !== null) {
+                let currshipid = currentShip.id.split("shipPreview-")[1];
+                let ship = shipDetails?.ships.find((ship) => ship.id == currshipid);
+
+                if (!ship)
+                    return;
+
+                let invalid = false;
+
+                if (shipOrientation == "horizontal") {
+                    // Check if the ship is out of bounds
+                    if (x + ship.size > boardDims?.width)
+                        invalid = true;
+                    for (let i = 0; i < ship.size && i + x < boardDims.width; i++) {
+                        let cell = document.querySelector("#board-cell-" + (x + i) + "-" + y);
+                        cell.classList.add("shiphover");
+                        if (cell.classList.contains("shipplaced")) {
+                            invalid = true;
+                            cell.classList.add("shiphover-crossing");
+                        }
+                    }
+                    if (invalid) {
+                        for (let i = 0; i < ship.size && i + x < boardDims.width; i++) {
+                            let cell = document.querySelector("#board-cell-" + (x + i) + "-" + y);
+                            cell.classList.add("shiphover-invalid");
+                        }
+                    }
+                } else {
+                    if (y + ship.size > boardDims?.height)
+                        invalid = true;
+                    for (let i = 0; i < ship.size && i + y < boardDims.height; i++) {
+                        let cell = document.querySelector("#board-cell-" + x + "-" + (y + i));
+                        cell.classList.add("shiphover");
+                        if (cell.classList.contains("shipplaced")) {
+                            invalid = true;
+                            cell.classList.add("shiphover-crossing");
+                        }
+                    }
+                    if (invalid) {
+                        for (let i = 0; i < ship.size && i + y < boardDims.height; i++) {
+                            let cell = document.querySelector("#board-cell-" + x + "-" + (y + i));
+                            cell.classList.add("shiphover-invalid");
+                        }
+                    }
+                }
+            }
+        }
+
+        async function generateBoard(width, height) {
+            let cont = document.querySelector("#pregameContainer #pregameBoard");
+            let board = document.createElement("table");
+
+            board.addEventListener("mouseover", (e) => {
+                isHoveringOverBoard = true;
+                boardHoverShowShip(e);
+            });
+
+            board.addEventListener("mouseleave", (e) => {
+                isHoveringOverBoard = false;
+                let cells = document.querySelectorAll(".shiphover");
+                for (let cell of cells) {
+                    cell.classList.remove("shiphover");
+                }
+            });
+
+            let shipRotate = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                // console.log("Ship rotated!");
+                shipOrientation = shipOrientation == "horizontal" ? "vertical" : "horizontal";
+                boardHoverShowShip(e);
+            };
+
+            let placeShip = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                if (currentShip === null)
+                    return;
+
+                if (document.querySelectorAll(".shiphover-invalid").length > 0)
+                    return;
+
+                
+                let currshipid = currentShip.id.split("shipPreview-")[1];
+                let ship = shipDetails?.ships.find((ship) => ship.id == currshipid);
+
+                if (!ship)
+                    return;
+
+                let x = lastBoardHoverLocation.x;
+                let y = lastBoardHoverLocation.y;
+
+                let cells = document.querySelectorAll(".shiphover");
+                for (let cell of cells) {
+                    cell.classList.remove("shiphover");
+                    cell.classList.remove("shiphover-invalid");
+                    cell.classList.remove("shiphover-crossing");
+                    cell.classList.add("shipplaced");
+                }
+
+                currentShip.classList.add("placed");
+                currentShip = null;
+
+                document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected")?.classList?.remove("selected");
+                document.querySelector("#pregameContainer #pregameShipContainer .shipPreview:not(.placed)")?.click();
+            };
+
+            board.addEventListener("contextmenu", shipRotate);
+
+            // board.addEventListener("click", placeShip);
+
+            var presslistener = document.addEventListener("keypress", (e) => {
+                // console.log(e.key);
+                if (!document.querySelector("#pregameContainer")) {
+                    document.removeEventListener("keypress", presslistener);
+                    return;
+                }      
+
+                if (
+                    (e.key == " ")) {
+                    shipOrientation = shipOrientation == "horizontal" ? "vertical" : "horizontal";
+                    boardHoverShowShip();
+                    e.stopPropagation();
+                    e.preventDefault();
+                    console.log("Ship rotated using '"+ e.key +"' key!");
+                } else if (e.key == "Enter") {
+                    placeShip(e);
+                }
+            });
+
+            // Tab needs keydown - else it would be captured by the browser
+            var keydownlistener = document.addEventListener("keydown", (e) => {
+                if (!document.querySelector("#pregameContainer")) {
+                    document.removeEventListener("keypress", keydownlistener);
+                    return;
+                }
+
+                if (e.key == "Tab") {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    console.log("Tab pressed!");
+                    // Select ship
+                    var ships = document.querySelectorAll("#pregameContainer #pregameShipContainer .shipPreview");
+                    let selected = document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected");
+
+                    if (selected == null) {
+                        ships[0].classList.add("selected");
+                    } else {
+                        // If shift is pressed, select previous ship
+                        if (e.shiftKey) {
+                            let index = Array.from(ships).indexOf(selected);
+                            if (index == 0) {
+                                ships[ships.length - 1].classList.add("selected");
+                                selected.classList.remove("selected");
+                            } else {
+                                ships[index - 1].classList.add("selected");
+                                selected.classList.remove("selected");
+                            }
+                        } else {
+                            let index = Array.from(ships).indexOf(selected);
+                            if (index == ships.length - 1) {
+                                ships[0].classList.add("selected");
+                                selected.classList.remove("selected");
+                            } else {
+                                ships[index + 1].classList.add("selected");
+                                selected.classList.remove("selected");
+                            }
+                        }
+                    }
+                    currentShip = document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected");
+                
+                    if (!lastBoardHoverLocation)
+                        lastBoardHoverLocation = { x: 0, y: 0 };
+                    boardHoverShowShip();
+                } else if (e.key.match(/^Arrow.*/g)) {
+                    console.log("Arrow key pressed!");
+                    
+                    if (!currentShip)
+                    currentShip = document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected");
+                    
+                    if (!currentShip) {
+                        var ships = document.querySelectorAll("#pregameContainer #pregameShipContainer .shipPreview");
+                        currentShip = ships[0];
+                        ships[0].classList.add("selected");
+                    }
+                    
+                    if (!lastBoardHoverLocation) {
+                        lastBoardHoverLocation = { x: 0, y: 0 };
+                        boardHoverShowShip();
+                        return;
+                    }
+
+                    if (e.key == "ArrowUp") {
+                        lastBoardHoverLocation.y--;
+                    } else if (e.key == "ArrowDown") {
+                        lastBoardHoverLocation.y++;
+                    } else if (e.key == "ArrowLeft") {
+                        lastBoardHoverLocation.x--;
+                    } else if (e.key == "ArrowRight") {
+                        lastBoardHoverLocation.x++;
+                    }
+
+                    if (lastBoardHoverLocation.x < 0)
+                        lastBoardHoverLocation.x = 0;
+                    if (lastBoardHoverLocation.y < 0)
+                        lastBoardHoverLocation.y = 0;
+                    if (lastBoardHoverLocation.x >= boardDims.width)
+                        lastBoardHoverLocation.x = boardDims.width - 1;
+                    if (lastBoardHoverLocation.y >= boardDims.height)
+                        lastBoardHoverLocation.y = boardDims.height - 1;
+
+                    boardHoverShowShip();
+                }
+            })
+
+            board.id = "pregameBoardTable";
+            for (let y = 0; y < height; y++) {
+                let row = document.createElement("tr");
+                for (let x = 0; x < width; x++) {
+                    let cell = document.createElement("td");
+                    cell.classList.add("board-cell");
+                    cell.classList.add("board-cell-" + x + "-" + y);
+                    cell.id = "board-cell-" + x + "-" + y;
+                    row.appendChild(cell);
+                }
+                board.appendChild(row);
+            }
+            cont.appendChild(board);
+        }
+
+        async function main() {
+            shipDetails = await window.x.APIHandler.getAvailableShips();
+            boardDims = await window.x.APIHandler.getBoardDimensions();
+            console.log(`Board Dimensions: w: ${boardDims.width}, h: ${boardDims.height}`);
+            if (shipDetails?.ships) {
+                let shipSel = await generateShipSelection(shipDetails.ships);
+            }
+            await generateBoard(boardDims.width, boardDims.height);
+        }
+
+        return {
+            main: main,
+            generateShipSelection: generateShipSelection
         }
     }
 
-    pregameCompMain();
+    pregameCompScript().main();
 </script>
+<style>
+    #pregameContainer #pregameShipContainer .shipPreview {
+        cursor: pointer;
+    }
+
+    #pregameContainer #pregameShipContainer .shipPreview.selected {
+        border: 2px solid red;
+        /* TODO: Should be handled inside ship component */
+    }
+
+    #pregameContainer #pregameShipContainer .shipPreview.placed {
+        color: blue;
+        /* TODO: Should be handled inside ship component */
+    }
+
+    #pregameContainer #pregameBoard {
+        border-collapse: collapse;
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+        background-color: var(--bg-root);
+    }
+
+    #pregameContainer #pregameBoardTable {
+        border-collapse: collapse;
+        display: table;
+        table-layout: auto;
+    }
+
+    #pregameContainer #pregameBoardTable tr {
+        height: var(--board-cell-size);
+    }
+
+    #pregameContainer #pregameBoard .board-cell {
+        min-width: var(--board-cell-size);
+        min-height: var(--board-cell-size);
+        border: var(--board-cell-border);
+        margin: 0px;
+        aspect-ratio: 1;
+        display: table-cell;
+    }
+
+    #pregameContainer #pregameBoard .board-cell.shiphover {
+        background-color: var(--pregame-ship-placeable);
+    }
+
+    #pregameContainer #pregameBoard .board-cell.shiphover.shiphover-invalid {
+        background-color: var(--pregame-ship-unplaceable);
+    }
+
+    #pregameContainer #pregameBoard .board-cell.shiphover.shiphover-invalid.shiphover-crossing {
+        background-color: var(--pregame-ship-crossing);
+    }
+
+    #pregameContainer #pregameBoard .board-cell.shipplaced {
+        background-color: var(--pregame-ship-placed);
+    }
+</style>
+<style media="(orientation: portrait)">
+    :root {
+        --board-cell-size: 40px;
+    }
+</style>
+<div id="pregameContainer">
+    <div id="pregameBoard"></div>
+    <div id="pregameShipContainer"></div>
+</div>
