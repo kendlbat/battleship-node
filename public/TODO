@@ -1,2 +1,6 @@
 - Proper load screen
-- Create ship assets (picures) & Register filename in (game.js).BattleshipGame.VESSELS
+- Create ship components
+  * Create assets
+  * Handle different selection states (placed, selected, unselected)
+- Add touch functionality to pregame
+- Add playing.html (also don't forget touch)
