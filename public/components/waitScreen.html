@@ -1,29 +1,29 @@
 <script>
     async function waitScreenCompMain() {
-        let status = await window.APIHandler.status();
-        console.log(status);
+        let status = await window.x.APIHandler.status();
+        window.x.statusPrint(status);
         document.querySelector("#waitScreenComp-code").innerText = status.gameId;
 
-        window.statusPoll = () => {
-            window.APIHandler.status().then((status) => {
-                console.log(status);
+        window.x.statusPoll = () => {
+            window.x.APIHandler.status().then((status) => {
+                window.x.statusPrint(status);
                 if (status.state == "starting") {
-                    window.statusPoll = () => { return undefined };
-                    window.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
                 } else if (status.state == "playing") {
-                    window.statusPoll = () => { return undefined };
-                    window.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
                 } else if (status.state == "finished") {
-                    window.statusPoll = () => { return undefined };
-                    window.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
                 }
             });
         }
     }
 
     document.querySelector("#waitScreenComp-leave").addEventListener("click", () => {
-        window.APIHandler.quit().then(() => {
-            window.loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        window.x.APIHandler.quit().then(() => {
+            window.x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
         });
     });
 

@@ -1,18 +1,18 @@
 <script>
     document.querySelector("#loginComp-form").addEventListener("submit", () => {
         let gameid = document.querySelector("#gameid-input").value;
-        window.APIHandler.joinGame(gameid)
+        window.x.APIHandler.joinGame(gameid)
             .then(() => {
                 console.log("Game joined");
-                window.loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
+                window.x.loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
             }).catch(() => console.error("Error while joining game"));
     });
     document.querySelector("#loginComp-create").addEventListener("click", () => {
-        window.APIHandler.createGame().then(() => console.log("Game created"));
-        window.loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
+        window.x.APIHandler.createGame().then(() => console.log("Game created"));
+        window.x.loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
     });
 
-    window.statusPoll = () => { return undefined };
+    window.x.statusPoll = () => { return undefined };
 </script>
 <form action="javascript:void(0);" id="loginComp-form">
     <input type="text" name="gameid" id="gameid-input">
