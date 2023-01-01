@@ -181,6 +181,10 @@ This is where players place their ships
                 let currshipid = currentShip.id.split("shipPreview-")[1];
                 let ship = shipDetails?.ships.find((ship) => ship.id == currshipid);
 
+                // if ship is placed already
+                if (currentShip.classList.contains("placed"))
+                    return;
+
                 if (!ship)
                     return;
 
@@ -204,7 +208,19 @@ This is where players place their ships
 
             board.addEventListener("contextmenu", shipRotate);
 
-            // board.addEventListener("click", placeShip);
+            board.addEventListener("click", placeShip);
+
+            board.addEventListener("touchstart", (e) => {
+                console.log(e);
+            });
+
+            board.addEventListener("touchmove", (e) => {
+                console.log(e);
+            });
+
+            board.addEventListener("touchend", (e) => {
+                console.log(e);
+            });
 
             var presslistener = document.addEventListener("keypress", (e) => {
                 // console.log(e.key);
