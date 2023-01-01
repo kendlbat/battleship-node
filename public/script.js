@@ -42,34 +42,63 @@ async function statusPrint(status) {
         ].join("\n"));
 }
 
+/**
+ * 
+ * @param {string} title 
+ * @param {string} message 
+ * @param {"error" | "warn" | "success" | "info" | undefined} type Type of notification (color) - if undefined: info 
+ */
+async function showNotification(title, message, type="info") {
+    let notifyBox = document.querySelector("#notifyBox");
+    let notification = document.createElement("div");
+    notification.classList.add("notification");
+
+    let titleElement = document.createElement("h1");
+    titleElement.innerText = title;
+    notification.appendChild(titleElement);
+
+    let messageElement = document.createElement("p");
+    messageElement.innerText = message;
+    notification.appendChild(messageElement);
+
+    notification.classList.add(type);
+    notifyBox.appendChild(notification);
+    setTimeout(() => {
+        notification.classList.add("notify-fadeout");
+        setTimeout(() => {
+            notifyBox.removeChild(notification);
+        }, 500);
+    }, 5000);
+}
+
 async function main() {
     copyrightLog();
     APIHandler = await import("./apiHandler.js");
     window.x.APIHandler = APIHandler;
-    x.loadComponent("components/loadScreen.html", document.querySelector("#componentContainer"));
+    loadComponent("components/loadScreen.html", document.querySelector("#componentContainer"));
     let status = await APIHandler.status();
 
     if (status.status == 400) {
-        x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        loadComponent("components/login.html", document.querySelector("#componentContainer"));
     } else if (status.status == 403 || status.status == 404) {
         APIHandler.quit();
-        x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        loadComponent("components/login.html", document.querySelector("#componentContainer"));
     } else if (status.status == "ok") {
         if (status.state == "starting") {
-            x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+            loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
         } else if (status.state == "playing") {
-            x.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+            loadComponent("components/playing.html", document.querySelector("#componentContainer"));
         } else if (status.state == "finished") {
-            x.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+            loadComponent("components/finished.html", document.querySelector("#componentContainer"));
         } else {
-            x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
+            loadComponent("components/login.html", document.querySelector("#componentContainer"));
         }
     }
 
-    window.statusPoll = () => { return undefined };
-    setInterval(() => window.statusPoll(), window.pollingInterval);
+    window.x.statusPoll = () => { return undefined };
+    setInterval(() => window.x.statusPoll(), window.pollingInterval);
 
-    x.statusPrint(status);
+    statusPrint(status);
 
 }
 
