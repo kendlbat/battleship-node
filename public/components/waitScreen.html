@@ -4,6 +4,17 @@
         window.x.statusPrint(status);
         document.querySelector("#waitScreenComp-code").innerText = status.gameId;
 
+        if (status.state == "starting") {
+            window.x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+            return;
+        } else if (status.state == "playing") {
+            window.x.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+            return;
+        } else if (status.state == "finished") {
+            window.x.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+            return;
+        }
+
         window.x.statusPoll = () => {
             window.x.APIHandler.status().then((status) => {
                 window.x.statusPrint(status);
