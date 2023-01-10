@@ -95,17 +95,21 @@ async function main() {
         }
     }
 
+    window.x.pollingInterval = 2000;
     window.x.statusPoll = () => { return undefined };
-    setInterval(() => window.x.statusPoll(), window.pollingInterval);
+    window.x.statusPollInterval = setInterval(() => window.x.statusPoll(), window.x.pollingInterval);
 
     statusPrint(status);
-
 }
 
-// window.x contains all globally available custom functions
 window.x = {};
-window.x.pollingInterval = 2000;
+window.x.changeStatusPollingInterval = (ms) => {
+    clearInterval(window.x.statusPollInterval);
+    window.x.pollingInterval = ms;
+    window.x.statusPollInterval = setInterval(() => window.x.statusPoll(), window.pollingInterval);
+}
 window.x.loadComponent = loadComponent;
 window.x.statusPrint = statusPrint;
+window.x.showNotification = showNotification;
 
 document.addEventListener("DOMContentLoaded", () => main());
