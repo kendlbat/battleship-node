@@ -12,6 +12,28 @@
         window.x.loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
     });
 
+    if (typeof isLoginInputListenerSet == "undefined") {
+        console.log("yeet");
+        document.querySelector("#gameid-input").addEventListener("keydown", (e) => {
+            e.preventDefault();
+            if (e.keyCode == 8) {
+                // Remove last character, if last character is a dash - remove two
+                document.querySelector("#gameid-input").value = document.querySelector("#gameid-input").value.slice(0, -1);
+                if (document.querySelector("#gameid-input").value.slice(-1) == "-") {
+                    document.querySelector("#gameid-input").value = document.querySelector("#gameid-input").value.slice(0, -1);
+                }
+            } else if (/^[0-9]$/i.test(event.key)) {
+                document.querySelector("#gameid-input").value += event.key;
+            }
+            if (document.querySelector("#gameid-input").value.length > 6) {
+                if (!document.querySelector("#gameid-input").value.includes("-")) {
+                    document.querySelector("#gameid-input").value = document.querySelector("#gameid-input").value.slice(0, 6) + "-" + document.querySelector("#gameid-input").value.slice(6);
+                }
+            }
+        });
+        let isLoginInputListenerSet = true;
+    }
+
     window.x.statusPoll = () => { return undefined };
 </script>
 <form action="javascript:void(0);" id="loginComp-form">
