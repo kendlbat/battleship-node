@@ -6,3 +6,8 @@
 - Add playing.html (also don't forget touch)
 - Spectator Mode
 - Quick join by QR Code (or similar)
+- Bottom Bar
+ * Slow / Fast Network Switch (Polling Interval)
+ * Quit Button
+ * Spectator Code (Game ID)
+- Polish Style (ask for help)
