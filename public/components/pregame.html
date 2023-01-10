@@ -176,14 +176,15 @@ This is where players place their ships
 
                 if (document.querySelectorAll(".shiphover-invalid").length > 0)
                     return;
-
                 
                 let currshipid = currentShip.id.split("shipPreview-")[1];
                 let ship = shipDetails?.ships.find((ship) => ship.id == currshipid);
 
                 // if ship is placed already
-                if (currentShip.classList.contains("placed"))
+                if (currentShip.classList.contains("placed")) {
+                    window.x.showNotification("Error", "Ship has already been placed!", "error");
                     return;
+                }
 
                 if (!ship)
                     return;
@@ -204,6 +205,10 @@ This is where players place their ships
 
                 document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected")?.classList?.remove("selected");
                 document.querySelector("#pregameContainer #pregameShipContainer .shipPreview:not(.placed)")?.click();
+
+                if (document.querySelectorAll("#pregameContainer #pregameShipContainer .shipPreview:not(.placed)").length == 0) {
+                    // SEND SHIPS HERE
+                }
             };
 
             board.addEventListener("contextmenu", shipRotate);
@@ -211,15 +216,38 @@ This is where players place their ships
             board.addEventListener("click", placeShip);
 
             board.addEventListener("touchstart", (e) => {
-                console.log(e);
+                e.preventDefault();
+                e.stopPropagation();
+                isHoveringOverBoard = true;
+                // Convert touch coordinates to mouse coordinates
+                let touch = e.touches[0];
+                let mouseEvent = new MouseEvent("mouseover", {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                board.dispatchEvent(mouseEvent);
             });
 
             board.addEventListener("touchmove", (e) => {
-                console.log(e);
+                e.preventDefault();
+                e.stopPropagation();
+                // Convert touch coordinates to mouse coordinates
+                let touch = e.touches[0];
+                let mouseEvent = new MouseEvent("mouseover", {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                board.dispatchEvent(mouseEvent);
             });
 
             board.addEventListener("touchend", (e) => {
-                console.log(e);
+                e.preventDefault();
+                e.stopPropagation();
+                isHoveringOverBoard = false;
+                let cells = document.querySelectorAll(".shiphover");
+                for (let cell of cells) {
+                    cell.classList.remove("shiphover");
+                }
             });
 
             var presslistener = document.addEventListener("keypress", (e) => {
