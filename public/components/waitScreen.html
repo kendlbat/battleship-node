@@ -34,6 +34,7 @@
 
     document.querySelector("#waitScreenComp-leave").addEventListener("click", () => {
         window.x.APIHandler.quit().then(() => {
+            window.x.statusPoll = () => { return undefined };
             window.x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
         });
     });
