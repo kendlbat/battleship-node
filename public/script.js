@@ -13,7 +13,8 @@ async function copyrightLog() {
 async function loadComponent(url, parent) {
     let comp = await (await fetch(url)).text();
     let scripts = comp.match(/<script>([\s\S]*?)<\/script>/g);
-    let scriptless = comp.replace(/<script>([\s\S]*?)<\/script>/g, "");
+    let srcscripts = comp.match(/<script src="([\s\S]*?)"><\/script>/g);
+    let scriptless = comp.replace(/<script>([\s\S]*?)<\/script>/g, "").replace(/<script src="([\s\S]*?)"><\/script>/g, "");
     parent.innerHTML = scriptless;
     parent.classList.add("component");
     if (scripts) {
@@ -21,6 +22,15 @@ async function loadComponent(url, parent) {
             let scriptContent = script.match(/<script>([\s\S]*?)<\/script>/)[1];
             let scriptElement = document.createElement("script");
             scriptElement.innerHTML = scriptContent;
+            parent.appendChild(scriptElement);
+        }
+    }
+
+    if (srcscripts) {
+        for (let script of srcscripts) {
+            let scriptContent = script.match(/<script src="([\s\S]*?)"><\/script>/)[1];
+            let scriptElement = document.createElement("script");
+            scriptElement.src = scriptContent;
             parent.appendChild(scriptElement);
         }
     }
