@@ -4,8 +4,9 @@
         window.x.APIHandler.joinGame(gameid)
             .then(() => {
                 console.log("Game joined");
+                window.x.showNotification("Success", "Game with id: \"" + gameid + "\" joined!", "success");
                 window.x.loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
-            }).catch(() => console.error("Error while joining game"));
+            }).catch(() => window.x.showNotification("Error", "Error while joining game.", "error"));
     });
     document.querySelector("#loginComp-create").addEventListener("click", () => {
         window.x.APIHandler.createGame().then(() => console.log("Game created"));
@@ -13,10 +14,18 @@
     });
 
     if (typeof isLoginInputListenerSet == "undefined") {
+        let testClipboardInputFlag = false;
+
         document.querySelector("#gameid-input").addEventListener("keydown", (e) => {
             let value = document.querySelector("#gameid-input").value;
-            console.log(e);
-            if (/^[a-zA-Z]$/g.test(e.key)) {
+
+            if (e.ctrlKey && e.key == "v") {
+                testClipboardInputFlag = true;
+                document.querySelector("#gameid-input").value = "";
+                return;
+            }
+
+            if (/^[a-zA-Z]$/g.test(e.key) && e.ctrlKey === false) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
@@ -24,6 +33,19 @@
             if (value.length >= 6) {
                 if (!value.includes("-") && e.key != "-" && e.key != "Backspace") {
                     document.querySelector("#gameid-input").value = value.substring(0, 6) + "-" + value.slice(6);
+                }
+            }
+        });
+
+        document.querySelector("#gameid-input").addEventListener("input", (e) => {
+            if (testClipboardInputFlag) {
+                testClipboardInputFlag = false;
+                let value = document.querySelector("#gameid-input").value;
+                if (!/^[0-9]{6}-[0-9]*$/g.test(value)) {
+                    window.x.showNotification("Warning", "You tried to paste an invalid game id.", "warn");
+                    document.querySelector("#gameid-input").value = "";
+                } else {
+                    window.x.showNotification("Success", "Game id pasted from clipboard!", "success");
                 }
             }
         });
