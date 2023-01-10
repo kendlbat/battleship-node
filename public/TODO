@@ -2,5 +2,7 @@
 - Create ship components
   * Create assets
   * Handle different selection states (placed, selected, unselected)
-- Add touch functionality to pregame
+- Fix touch functionality in pregame
 - Add playing.html (also don't forget touch)
+- Spectator Mode
+- Quick join by QR Code (or similar)
