@@ -15,3 +15,14 @@ GET http://localhost:8080/api/game/status
 ###
 
 GET http://localhost:8080/api/game/getAvailableShips
+
+###
+
+POST http://localhost:8080/api/game/placeShips
+Content-Type: application/json
+
+{"ships": [{"x": 0, "y": 0, "orientation": "horizontal", "id": "carrier", "size": 5}, {"x": 0, "y": 3, "orientation": "vertical", "id": "battleship", "size": 4 }, { "x": 3, "y": 1, "orientation": "horizontal", "id": "cruiser", "size": 3 }, { "x": 4, "y": 6, "orientation": "horizontal", "id": "submarine", "size": 3 }, { "x": 6, "y": 1, "orientation": "vertical", "id": "destroyer", "size": 2 }]}
+
+###
+
+GET http://localhost:8080/api/game/quit
