@@ -41,6 +41,12 @@ This is where players place their ships
         let isHoveringOverBoard = false;
 
         /**
+         * Details of ships that have been placed
+         * @type {[{id: string, x: number, y: number, orientation: "horizontal" | "vertical"}]}
+         */
+        let placedShips = [];
+
+        /**
          * Loads the ship components into the ship selection container
          * @param {[{id: string, length: number}]} ships
          * @returns {Promise<void>}
@@ -203,11 +209,21 @@ This is where players place their ships
                 currentShip.classList.add("placed");
                 currentShip = null;
 
+                // Add to placedShips
+                placedShips.push({
+                    id: ship.id,
+                    x,
+                    y,
+                    orientation: shipOrientation,
+                    size: ship.size
+                });
+
                 document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected")?.classList?.remove("selected");
                 document.querySelector("#pregameContainer #pregameShipContainer .shipPreview:not(.placed)")?.click();
 
                 if (document.querySelectorAll("#pregameContainer #pregameShipContainer .shipPreview:not(.placed)").length == 0) {
-                    // SEND SHIPS HERE
+                    console.log(placedShips)
+                    window.x.APIHandler.placeShips(placedShips).then((r) => r.json()).then(console.log);
                 }
             };
 
