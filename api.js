@@ -323,14 +323,14 @@ gameRouter.register(new Requestable(async (req, res) => {
         return;
     }
 
-    ships.forEach(ship => {
+    for (let ship of ships) {
         if (!vesselCheck.some(vessel => vessel.id === ship.id && vessel.size === ship.size)) {
             sendJSONError(400, "Malformed request", res);
             return;
         } else {
             vesselCheck = vesselCheck.filter(vessel => vessel.id !== ship.id);
         }
-    });
+    };
 
     if (vesselCheck.length !== 0) {
         sendJSONError(400, "Malformed request", res);
