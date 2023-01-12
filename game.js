@@ -179,13 +179,15 @@ class BattleshipBoard {
      * @returns {number[][]}
      */
     getCurrentState() {
-        let state = [];
-        for (let x = 0; x < this.width; x++) {
-            state[x] = [];
-            for (let y = 0; y < this.height; y++)
-                state[x][y] = this.checkSpace(x, y);
+        let board = [];
+        for (let y = 0; y < this.height; y++) {
+            board.push([]);
+            for (let x = 0; x < this.width; x++) {
+                board[y][x] = this.checkSpace(x, y);
+            }
+            console.log(board[y]);
         }
-        return state;
+        return board;
     }
 }
 
