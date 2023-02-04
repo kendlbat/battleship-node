@@ -1,0 +1,22 @@
+{
+  "name": "battleship-node",
+  "version": "1.0.0",
+  "description": "Multiplayer Battleship written in Node.js",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kendlbat/battleship-node.git"
+  },
+  "author": "Tobias Kendlbacher",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kendlbat/battleship-node/issues"
+  },
+  "homepage": "https://github.com/kendlbat/battleship-node#readme"
+}
