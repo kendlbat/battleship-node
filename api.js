@@ -57,7 +57,7 @@ async function sendJSONError(code, msg, res) {
  * @returns {{} | undefined}
  */
 function getCookies(req) {
-    let cookies;
+    let cookies = {};
 
     if (req.headers.cookie) {
         cookies = {};
