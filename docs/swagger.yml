@@ -209,6 +209,24 @@ paths:
                     status: "ok"
                     state: "finished"
                     gameId: "797236-0"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    description: Status of the API
+                    example: 400
+                  message:
+                    type: string
+                    description: Error message
+                    example: "Game not found"
+              example:
+                status: 400,
+                error: "Error message"
         "403":
           description: Not authorized
           content:
@@ -338,7 +356,7 @@ paths:
       tags:
         - game
       summary: Place ships on the board
-      description: The boards coordinates start at 0, 0<br>Normally, board is 10x10<br>Trying to send invalid ships will result in errors
+      description: The boards coordinates start at 0, 0<br>Normally, board is 8x8<br>Trying to send invalid ships will result in errors
       operationId: placeShips
       requestBody:
         description: Test
@@ -401,8 +419,6 @@ paths:
                       true,
                       true,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       true,
@@ -413,13 +429,9 @@ paths:
                       false,
                       false,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       true,
-                      false,
-                      false,
                       false,
                       false,
                       false,
@@ -437,8 +449,6 @@ paths:
                       false,
                       false,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       true,
@@ -448,8 +458,6 @@ paths:
                       false,
                       false,
                       true,
-                      false,
-                      false,
                       false,
                     ]
                   - [
@@ -461,8 +469,6 @@ paths:
                       false,
                       true,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       false,
@@ -473,12 +479,8 @@ paths:
                       false,
                       true,
                       false,
-                      false,
-                      false,
                     ]
                   - [
-                      false,
-                      false,
                       false,
                       false,
                       false,
@@ -497,12 +499,8 @@ paths:
                       false,
                       false,
                       false,
-                      false,
-                      false,
                     ]
                   - [
-                      false,
-                      false,
                       false,
                       false,
                       false,
@@ -601,8 +599,6 @@ paths:
                       true,
                       true,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       true,
@@ -613,13 +609,9 @@ paths:
                       false,
                       false,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       true,
-                      false,
-                      false,
                       false,
                       false,
                       false,
@@ -637,8 +629,6 @@ paths:
                       false,
                       false,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       true,
@@ -648,8 +638,6 @@ paths:
                       false,
                       false,
                       true,
-                      false,
-                      false,
                       false,
                     ]
                   - [
@@ -661,8 +649,6 @@ paths:
                       false,
                       true,
                       false,
-                      false,
-                      false,
                     ]
                   - [
                       false,
@@ -673,12 +659,8 @@ paths:
                       false,
                       true,
                       false,
-                      false,
-                      false,
                     ]
                   - [
-                      false,
-                      false,
                       false,
                       false,
                       false,
@@ -697,12 +679,8 @@ paths:
                       false,
                       false,
                       false,
-                      false,
-                      false,
                     ]
                   - [
-                      false,
-                      false,
                       false,
                       false,
                       false,
@@ -770,14 +748,14 @@ paths:
                     example: "ok"
                   width:
                     type: integer
-                    example: 10
+                    example: 8
                   height:
                     type: integer
-                    example: 10
+                    example: 8
               example:
                 status: "ok"
-                width: 10
-                height: 10
+                width: 8
+                height: 8
         "403":
           description: Not authorized
           content:

@@ -7,7 +7,7 @@ server.register(Requestable.fromStaticFolder("./public", "/static"));
 server.register(Requestable.fromStaticFolder("./docs", "/docs"));
 
 // Home page redirect
-server.register(Requestable.redirect("/", "/static/index.html", 302));
+server.register(Requestable.redirect("/", "/static/index.html", "ANY", 302));
 
 server.registerRouter(apiRouter, "/api");
 

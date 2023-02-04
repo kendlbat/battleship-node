@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "compounds": [
+        {
+            "name": "Debug Program",
+            "configurations": [
+                "Docker: Debug",
+                "Launch firefox"
+            ]
+        }
+    ],
+    "configurations": [
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Docker: Debug",
+            "remoteRoot": "/usr/src/app",
+            "preLaunchTask": "Docker Compose Debug",
+        },
+        {
+            "type": "firefox",
+            "request": "launch",
+            "reAttach": true,
+            "name": "Launch firefox",
+            "url": "http://localhost:8080/",
+            "webRoot": "${workspaceFolder}"
+        }
+    ]
+}

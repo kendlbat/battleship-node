@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  battleshipnode:
+    image: battleshipnode
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        PORT: 8080
+        ADDRESS: "0.0.0.0"
+    environment:
+      NODE_ENV: production

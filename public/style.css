@@ -1,0 +1,114 @@
+:root {
+    --bg-root: #222;
+    --font-color: #fff;
+    --accent-color: rgb(132, 0, 255);
+
+    --board-cell-size: 44px;
+    --board-cell-border: 1px solid #fff;
+    --board-cell-border-radius: 3px;
+
+    --pregame-ship-placeable: rgb(3, 151, 3);
+    --pregame-ship-unplaceable: #f00;
+    --pregame-ship-placed: #00f;
+    --pregame-ship-crossing: #80f;
+
+    --notify-error-bg: #f00;
+    --notify-warn-bg: #ff0;
+    --notify-info-bg: #00f;
+    --notify-success-bg: #0a0;
+
+    --notify-error-color: #fff;
+    --notify-warn-color: #000;
+    --notify-info-color: #fff;
+    --notify-success-color: #fff;
+
+    background-color: var(--bg-root);
+    color: var(--font-color);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+@keyframes notifyFadein {
+    0% {
+        opacity: 0%;
+    }
+
+    100% {
+        opacity: 100%;
+    }
+}
+
+@keyframes notifyFadeout {
+    0% {
+        opacity: 100%;
+    }
+
+    100% {
+        opacity: 0%;
+    }
+}
+
+#notifyBox {
+    position: fixed;
+    z-index: 99;
+    top: 0;
+    right: 0;
+    width: 300px;
+    padding: 5px 5px;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+#notifyBox > div {
+    margin: 5px;
+    padding: 10px;
+    border-radius: 7px;
+    animation: notifyFadein 0.5s;
+}
+
+#notifyBox > div.notify-fadeout {
+    animation: notifyFadeout 0.5s;
+}
+
+#notifyBox > div > h1 {
+    font-size: large;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+}
+
+#notifyBox > div > p {
+    margin: 0; 
+}
+
+#notifyBox > div > * {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#notifyBox > div.error {
+    background-color: var(--notify-error-bg);
+    color: var(--notify-error-color);
+}
+
+#notifyBox > div.warn {
+    background-color: var(--notify-warn-bg);
+    color: var(--notify-warn-color);
+}
+
+#notifyBox > div.info {
+    background-color: var(--notify-info-bg);
+    color: var(--notify-info-color);
+}
+
+#notifyBox > div.success {
+    background-color: var(--notify-success-bg);
+    color: var(--notify-success-color);
+}
+
+@media screen and (max-width: 600px) {
+    #notifyBox {
+        width: 100%;
+    }
+}
+

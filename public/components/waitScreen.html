@@ -1,0 +1,45 @@
+<script>
+    async function waitScreenCompMain() {
+        let status = await window.x.APIHandler.status();
+        window.x.statusPrint(status);
+        document.querySelector("#waitScreenComp-code").innerText = status.gameId;
+
+        if (status.state == "starting") {
+            window.x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+            return;
+        } else if (status.state == "playing") {
+            window.x.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+            return;
+        } else if (status.state == "finished") {
+            window.x.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+            return;
+        }
+
+        window.x.statusPoll = () => {
+            window.x.APIHandler.status().then((status) => {
+                window.x.statusPrint(status);
+                if (status.state == "starting") {
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+                } else if (status.state == "playing") {
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+                } else if (status.state == "finished") {
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+                }
+            });
+        }
+    }
+
+    document.querySelector("#waitScreenComp-leave").addEventListener("click", () => {
+        window.x.APIHandler.quit().then(() => {
+            window.x.statusPoll = () => { return undefined };
+            window.x.loadComponent("components/login.html", document.querySelector("#componentContainer"));
+        });
+    });
+
+    waitScreenCompMain();
+</script>
+<h1 id="waitScreenComp-code">Loading...</h1>
+<button type="button" id="waitScreenComp-leave">Leave</button>

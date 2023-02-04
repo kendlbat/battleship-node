@@ -123,7 +123,7 @@ apiRouter.registerRouter(gameRouter, "/game");
 }; */
 
 // When root is requested, redirect to docs
-apiRouter.register(Requestable.redirect("/api", "/docs/swagger/index.html"));
+apiRouter.register(Requestable.redirect("/", "/docs/swagger/index.html"));
 
 apiRouter.register(new Requestable((req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -161,7 +161,10 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     res.writeHead(200, {
         "Content-Type": "application/json",
-        "Set-Cookie": [`gameId=${gameId}`, `token=${token}`]
+        "Set-Cookie": [
+            `gameId=${gameId}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`,
+            `token=${token}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`
+        ]
     });
     res.end(JSON.stringify({ status: "ok", gameId, token }));
 }, "GET", "/create"));
@@ -207,7 +210,10 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     res.writeHead(200, {
         "Content-Type": "application/json",
-        "Set-Cookie": [`gameId=${gameId}`, `token=${token}`]
+        "Set-Cookie": [
+            `gameId=${gameId}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`,
+            `token=${token}; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/`
+        ]
     });
     res.end(JSON.stringify({ status: "ok", gameId, token }));
 }, "GET", "/join"));
@@ -230,7 +236,8 @@ gameRouter.register(new Requestable(async (req, res) => {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
         status: "ok",
-        state: game.status
+        state: game.status,
+        gameId: getCookies(req)["gameId"]
     }));
 }, "GET", "/status"));
 
@@ -316,14 +323,14 @@ gameRouter.register(new Requestable(async (req, res) => {
         return;
     }
 
-    ships.forEach(ship => {
+    for (let ship of ships) {
         if (!vesselCheck.some(vessel => vessel.id === ship.id && vessel.size === ship.size)) {
             sendJSONError(400, "Malformed request", res);
             return;
         } else {
             vesselCheck = vesselCheck.filter(vessel => vessel.id !== ship.id);
         }
-    });
+    };
 
     if (vesselCheck.length !== 0) {
         sendJSONError(400, "Malformed request", res);
@@ -543,25 +550,25 @@ gameRouter.register(new Requestable(async (req, res) => {
  * Quits the game
  */
 gameRouter.register(new Requestable(async (req, res) => {
-    let game = getGameFromRequest(req, res);
-    if (!game) return;
+    // Get game without any checks
+    // Get cookie
+    let cookies = getCookies(req);
+    let game = games[cookies["gameId"]];
 
-    let player = whichPlayer(req, res, game);
-    if (!player) return;
-
-    if (game.status !== "finished") {
-        // Forfeit game
-        game.status = "finished";
-        game.winner = player === 1 ? 2 : 1;
+    if (game) {
+        let player = whichPlayer(req, res, game);
+        if (player && game.status !== "finished") {
+            game.status = "finished";
+            game.winner = player === 1 ? 2 : 1;
+        }
     }
 
     // Clear cookies
-    res.setHeader();
     res.writeHead(200, {
         "Content-Type": "application/json",
         "Set-Cookie": [
-            "token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/",
-            "gameId=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
+            "token=; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/",
+            "gameId=; expires=Thu, 01 Jan 2999 00:00:00 GMT; path=/"
         ]
     });
     res.end(JSON.stringify({

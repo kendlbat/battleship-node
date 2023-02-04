@@ -1,12 +1,11 @@
-DEFAULT_WIDTH = 10
-DEFAULT_HEIGHT = 10
+DEFAULT_WIDTH = 8
+DEFAULT_HEIGHT = 8
 
 // X is left to right
 // Y is top to bottom
 
 class BattleshipGame {
     static VESSELS = [
-    
         {
             id: 'carrier',
             size: 5
@@ -180,13 +179,15 @@ class BattleshipBoard {
      * @returns {number[][]}
      */
     getCurrentState() {
-        let state = [];
-        for (let x = 0; x < this.width; x++) {
-            state[x] = [];
-            for (let y = 0; y < this.height; y++)
-                state[x][y] = this.checkSpace(x, y);
+        let board = [];
+        for (let y = 0; y < this.height; y++) {
+            board.push([]);
+            for (let x = 0; x < this.width; x++) {
+                board[y][x] = this.checkSpace(x, y);
+            }
+            console.log(board[y]);
         }
-        return state;
+        return board;
     }
 }
 

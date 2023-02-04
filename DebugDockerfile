@@ -1,0 +1,16 @@
+FROM node:lts-alpine
+ENV NODE_ENV=development
+# Get port from argument
+ARG PORT=8080
+ENV PORT=$PORT
+
+ARG ADDRESS="0.0.0.0"
+ENV ADDRESS=$ADDRESS
+WORKDIR /usr/src/app
+COPY . .
+RUN chown -R node /usr/src/app
+USER node
+EXPOSE $PORT
+
+EXPOSE 9229
+CMD ["node", "--inspect=0.0.0.0:9229", "server.js"]
