@@ -5,9 +5,12 @@ services:
     image: battleshipnode
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./DebugDockerfile
       args:
         PORT: 8080
         ADDRESS: "0.0.0.0"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
+    ports:
+      - "8080:8080"
+      - "9229:9229"

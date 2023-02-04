@@ -1,18 +1,22 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "Debug",
+            "name": "Debug Program",
             "configurations": [
-                "Launch Program",
+                "Docker: Debug",
                 "Launch firefox"
             ]
         }
     ],
     "configurations": [
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Docker: Debug",
+            "remoteRoot": "/usr/src/app",
+            "preLaunchTask": "Docker Compose Debug",
+        },
         {
             "type": "firefox",
             "request": "launch",
@@ -20,15 +24,6 @@
             "name": "Launch firefox",
             "url": "http://localhost:8080/",
             "webRoot": "${workspaceFolder}"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\server.js"
         }
     ]
 }
