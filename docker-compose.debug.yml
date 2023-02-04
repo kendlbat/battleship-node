@@ -5,7 +5,7 @@ services:
     image: battleshipnode
     build:
       context: .
-      dockerfile: ./DebugDockerfile
+      dockerfile: ./DockerfileDebug
       args:
         PORT: 8080
         ADDRESS: "0.0.0.0"
