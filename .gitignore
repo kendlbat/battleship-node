@@ -78,3 +78,4 @@ fabric.properties
 
 package-*.json
 node_modules
+.vscode/firefox-profile
