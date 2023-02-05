@@ -132,7 +132,7 @@ paths:
                     description: Error message
                     example: "Game not found"
               example:
-                status: 400,
+                status: 400
                 error: "Error message"
 
         "404":
@@ -225,7 +225,7 @@ paths:
                     description: Error message
                     example: "Game not found"
               example:
-                status: 400,
+                status: 400
                 error: "Error message"
         "403":
           description: Not authorized
