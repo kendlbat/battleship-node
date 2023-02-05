@@ -258,7 +258,7 @@ class ServerManager {
         return new Promise((resolve, reject) => {
             this.listening = true;
             this.server = http.createServer(async (req, res) => {
-                console.log(req.url);
+                console.log(`${new Date().toISOString()} : ${req.url}`);
                 this.precall(req, res);
 
                 let regexPathMatched = false;
@@ -419,7 +419,8 @@ class Requestable {
                 ;
             }
 
-            console.log(filepath);
+            // DEBUG: log file path on request
+            // console.log(filepath);
 
             if (stats == undefined) {
                 res.writeHead(404, { "Content-Type": "text/plain" });
