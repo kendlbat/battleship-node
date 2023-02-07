@@ -104,9 +104,9 @@ class ServerManager {
      *  * `precall` : `Function | undefined` -> Executed prior to handling a request  
      *  * `address` : `string | undefined` -> Server listening address; Default:&nbsp;`127.0.0.1`  
      *  * `port` : `number | undefined` -> Server listening port; Default:&nbsp;`8080`
-     * @param {object | undefined} options
+     * @param {{ fallback?: Function, precall?: Function, address?: string, port?: number} | undefined} options
      */
-    constructor(options = {}, configFile = undefined) {
+    constructor(options = { fallback: undefined, precall: undefined, address: undefined, port: undefined }, configFile = undefined) {
         if (configFile) {
             // Check if the config file exists
             if (!fs.existsSync(configFile))
@@ -126,13 +126,50 @@ class ServerManager {
                 options.indexPages = ["index.html", "index.htm"];
         }
 
+        /**
+         * @type {Object.<string, Requestable>}
+        */
         this.paths = {};
+
+        /**
+         * @type {Function}
+         * @param {http.IncomingMessage} req
+         * @param {http.ServerResponse} res
+         */
         this.fallback = options.fallback || this.defaultFallback;
+
+        /**
+         * @type {Function}
+         * @param {http.IncomingMessage} req
+         * @param {http.ServerResponse} res
+        */
         this.precall = options.precall || this.defaultPrecall;
+
+        /**
+         * @type {boolean}
+        */
         this.listening = false;
+
+        /**
+         * @type {string}
+         * @default "0.0.0.0"
+        */
         this.address = options.address || "0.0.0.0";
+
+        /**
+         * @type {number}
+         * @default 8080
+        */
         this.port = options.port || 8080;
+
+        /**
+         * @type {http.Server}
+        */
         this.server = null;
+
+        /**
+         * @type {Object.<string, string>}
+        */
         this.config = options;
     }
 
@@ -221,7 +258,7 @@ class ServerManager {
         return new Promise((resolve, reject) => {
             this.listening = true;
             this.server = http.createServer(async (req, res) => {
-                console.log(req.url);
+                console.log(`${new Date().toISOString()} : ${req.url}`);
                 this.precall(req, res);
 
                 let regexPathMatched = false;
@@ -382,7 +419,8 @@ class Requestable {
                 ;
             }
 
-            console.log(filepath);
+            // DEBUG: log file path on request
+            // console.log(filepath);
 
             if (stats == undefined) {
                 res.writeHead(404, { "Content-Type": "text/plain" });

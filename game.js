@@ -169,6 +169,7 @@ class BattleshipBoard {
     placeVessels(vessels) {
         for (let vessel of vessels)
             if (!this.placeShip(vessel)) {
+                this.ships = undefined;
                 this.ships = [];
                 return false;
             }
@@ -185,7 +186,8 @@ class BattleshipBoard {
             for (let x = 0; x < this.width; x++) {
                 board[y][x] = this.checkSpace(x, y);
             }
-            console.log(board[y]);
+            // DEBUG
+            // console.log(board[y]);
         }
         return board;
     }

@@ -182,7 +182,7 @@ This is where players place their ships
 
                 if (document.querySelectorAll(".shiphover-invalid").length > 0)
                     return;
-                
+
                 let currshipid = currentShip.id.split("shipPreview-")[1];
                 let ship = shipDetails?.ships.find((ship) => ship.id == currshipid);
 
@@ -222,8 +222,22 @@ This is where players place their ships
                 document.querySelector("#pregameContainer #pregameShipContainer .shipPreview:not(.placed)")?.click();
 
                 if (document.querySelectorAll("#pregameContainer #pregameShipContainer .shipPreview:not(.placed)").length == 0) {
-                    console.log(placedShips)
-                    window.x.APIHandler.placeShips(placedShips).then((r) => r.json()).then(console.log);
+                    console.log(placedShips);
+                    window.x.APIHandler.placeShips(placedShips).then((r) => r.json().then((status) => {
+                        if (status?.status !== "ok") {
+                            window.x.showNotification("Error", "Failed to place ships!", "error");
+                            window.x.statusPoll = () => undefined;
+                            loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+                        } else {
+                            window.x.showNotification("Success", "Ships placed successfully!", "success");
+                            window.x.statusPoll = () => undefined;
+                            loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+                        }
+                    })).catch(() => {
+                        window.x.showNotification("Error", "Failed to place ships!", "error");
+                        window.x.statusPoll = () => undefined;
+                        loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+                    });
                 }
             };
 
@@ -271,7 +285,7 @@ This is where players place their ships
                 if (!document.querySelector("#pregameContainer")) {
                     document.removeEventListener("keypress", presslistener);
                     return;
-                }      
+                }
 
                 if (
                     (e.key == " ")) {
@@ -279,7 +293,7 @@ This is where players place their ships
                     boardHoverShowShip();
                     e.stopPropagation();
                     e.preventDefault();
-                    console.log("Ship rotated using '"+ e.key +"' key!");
+                    console.log("Ship rotated using '" + e.key + "' key!");
                 } else if (e.key == "Enter") {
                     placeShip(e);
                 }
@@ -325,22 +339,22 @@ This is where players place their ships
                         }
                     }
                     currentShip = document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected");
-                
+
                     if (!lastBoardHoverLocation)
                         lastBoardHoverLocation = { x: 0, y: 0 };
                     boardHoverShowShip();
                 } else if (e.key.match(/^Arrow.*/g)) {
                     console.log("Arrow key pressed!");
-                    
+
                     if (!currentShip)
-                    currentShip = document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected");
-                    
+                        currentShip = document.querySelector("#pregameContainer #pregameShipContainer .shipPreview.selected");
+
                     if (!currentShip) {
                         var ships = document.querySelectorAll("#pregameContainer #pregameShipContainer .shipPreview");
                         currentShip = ships[0];
                         ships[0].classList.add("selected");
                     }
-                    
+
                     if (!lastBoardHoverLocation) {
                         lastBoardHoverLocation = { x: 0, y: 0 };
                         boardHoverShowShip();
@@ -386,13 +400,24 @@ This is where players place their ships
         }
 
         async function main() {
+            window.x.statusPoll = () => {
+                window.x.APIHandler.status().then((status) => {
+                    if (status?.state == "playing") {
+                        window.x.statusPoll = () => { return undefined; };
+                        loadComponent("components/playing.html", document.querySelector("#componentContainer"));
+                    }
+                }).catch(console.error);
+            }
+            window.x.statusPoll();
             shipDetails = await window.x.APIHandler.getAvailableShips();
             boardDims = await window.x.APIHandler.getBoardDimensions();
             console.log(`Board Dimensions: w: ${boardDims.width}, h: ${boardDims.height}`);
-            if (shipDetails?.ships) {
+            if (shipDetails?.ships?.length > 0) {
                 let shipSel = await generateShipSelection(shipDetails.ships);
+                await generateBoard(boardDims.width, boardDims.height);
+            } else {
+                window.x.loadComponent("components/waitingForOtherPlayer.html", document.querySelector("#pregameContainer"));
             }
-            await generateBoard(boardDims.width, boardDims.height);
         }
 
         return {

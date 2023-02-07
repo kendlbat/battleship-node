@@ -32,7 +32,7 @@ function getRequestBody(req) {
         req.on("data", chunk => body += chunk);
         req.on("end", () => {
             try {
-                console.log(body);
+                // console.log(body);
                 resolve(JSON.parse(body));
             } catch (err) {
                 reject(err);
@@ -57,7 +57,7 @@ async function sendJSONError(code, msg, res) {
  * @returns {{} | undefined}
  */
 function getCookies(req) {
-    let cookies;
+    let cookies = {};
 
     if (req.headers.cookie) {
         cookies = {};
@@ -176,7 +176,7 @@ gameRouter.register(new Requestable(async (req, res) => {
 gameRouter.register(new Requestable(async (req, res) => {
     // Get cookies
     let cookies = getCookies(req);
-    console.log(cookies);
+    // console.log(cookies);
 
     if (cookies && cookies["gameId"]) {
         if (games[cookies["gameId"]]) {
@@ -231,7 +231,7 @@ gameRouter.register(new Requestable(async (req, res) => {
     let player = whichPlayer(req, res, game);
     if (!player) return;
 
-    console.log(game);
+    // console.log(game);
 
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
@@ -306,7 +306,7 @@ gameRouter.register(new Requestable(async (req, res) => {
     let ships = body.ships;
 
     for (let ship of ships) {
-        console.log(ship);
+        // console.log(ship);
         if (!ship || Number.isNaN(ship.x) || Number.isNaN(ship.y) || !ship.orientation || !ship.id || Number.isNaN(ship.size)) {
             sendJSONError(400, "Malformed request", res);
             return;

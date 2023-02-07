@@ -1,7 +1,10 @@
 const { ServerManager, Requestable, NOTFOUNDFALLBACK } = require("./wrapper");
 const apiRouter = require("./api");
 
-let server = new ServerManager();
+const PORT = process.env.PORT || 8080;
+const ADDRESS = process.env.ADDRESS || "0.0.0.0";
+
+let server = new ServerManager({ address: ADDRESS, port: PORT });
 
 server.register(Requestable.fromStaticFolder("./public", "/static"));
 server.register(Requestable.fromStaticFolder("./docs", "/docs"));

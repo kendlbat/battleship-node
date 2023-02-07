@@ -2,10 +2,17 @@
     "version": "0.2.0",
     "compounds": [
         {
-            "name": "Debug Program",
+            "name": "Docker + FF: Debug Program",
             "configurations": [
-                "Docker: Debug",
-                "Launch firefox"
+                "Docker: Debug Server",
+                "Firefox: Launch"
+            ]
+        },
+        {
+            "name": "Node + FF: Debug Program",
+            "configurations": [
+                "Node: Debug Program",
+                "Firefox: Launch"
             ]
         }
     ],
@@ -13,7 +20,7 @@
         {
             "type": "node",
             "request": "attach",
-            "name": "Docker: Debug",
+            "name": "Docker: Debug Server",
             "remoteRoot": "/usr/src/app",
             "preLaunchTask": "Docker Compose Debug",
         },
@@ -21,9 +28,17 @@
             "type": "firefox",
             "request": "launch",
             "reAttach": true,
-            "name": "Launch firefox",
+            "name": "Firefox: Launch",
             "url": "http://localhost:8080/",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+            "keepProfileChanges": true,
+            "profileDir": "${workspaceFolder}/.vscode/firefox-profile",
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Node: Debug Program",
+            "program": "${workspaceFolder}/server.js"
         }
     ]
 }
