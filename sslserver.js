@@ -2,8 +2,6 @@ var Greenlock = require('greenlock-express');
 var fs = require('fs');
 
 async function main() {
-    console.log("SSL config: " + JSON.stringify(sslconf));
-
     const { ServerManager, Requestable, NOTFOUNDFALLBACK } = require("./wrapper");
     const apiRouter = require("./api");
 
