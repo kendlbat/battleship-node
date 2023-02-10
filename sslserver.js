@@ -41,6 +41,10 @@ async function main() {
     key = greenlockResp.privkey;
     chain = greenlockResp.chain;
 
+    console.log("Cert: " + cert);
+    console.log("Key: " + key);
+    console.log("Chain: " + chain);
+
     const { ServerManager, Requestable, NOTFOUNDFALLBACK } = require("./wrapper");
     const apiRouter = require("./api");
 

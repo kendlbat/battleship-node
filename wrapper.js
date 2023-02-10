@@ -294,10 +294,10 @@ class ServerManager {
      * Starts listening for requests (HTTPS)
      * @returns {Promise<object>} Details about the server
      */
-    listenSSL(cert=undefined, key=undefined) {
+    listenSSL(cert=undefined, key=undefined, chain=undefined) {
         return new Promise((resolve, reject) => {
             this.listening = true;
-            this.server = https.createServer({ cert: cert, key: key }, async (req, res) => {
+            this.server = https.createServer({ cert: cert, key: key, ca: chain }, async (req, res) => {
                 console.log(`${new Date().toISOString()} : ${req.url}`);
                 this.precall(req, res);
 
