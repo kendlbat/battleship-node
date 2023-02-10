@@ -1,49 +1,8 @@
-var Greenlock = require('greenlock');
+var Greenlock = require('greenlock-express');
 var fs = require('fs');
 
 async function main() {
-    var greenlock = Greenlock.create({
-        packageRoot: __dirname,
-        configDir: "./greenlock.d/",
-        packageAgent: "Battleship Node/1.0.0",
-        maintainerEmail: "battleship-node@kendlbat.dev",
-        staging: false,
-        notify: function (event, details) {
-            if ('error' === event) {
-                // `details` is an error object in this case
-                console.error(details);
-            }
-        }
-    });
-
-    var cert, key, chain;
-
-    var domain = "battleship.kendlbat.dev";
-
-    var greenlockConf = await greenlock.manager.defaults({
-        agreeToTerms: true,
-        subscriberEmail: "ssl@kendlbat.dev"
-    });
-    console.log("Configured greenlock: " + greenlockConf);
-
-    var sslconf = await greenlock.add({
-        subject: domain,
-        altnames: [domain]
-    });
-
-    console.log("SSL config: " + sslconf);
-
-    var greenlockResp = await greenlock.get({ servername: domain });
-
-    console.log("Greenlock response: " + greenlockResp);
-
-    cert = greenlockResp.cert;
-    key = greenlockResp.privkey;
-    chain = greenlockResp.chain;
-
-    console.log("Cert: " + cert);
-    console.log("Key: " + key);
-    console.log("Chain: " + chain);
+    console.log("SSL config: " + JSON.stringify(sslconf));
 
     const { ServerManager, Requestable, NOTFOUNDFALLBACK } = require("./wrapper");
     const apiRouter = require("./api");
@@ -61,7 +20,7 @@ async function main() {
 
     server.registerRouter(apiRouter, "/api");
 
-    server.listenSSL(cert, key);
+    server.listenSSL("ssl@kendlbat.dev");
 }
 
 main();

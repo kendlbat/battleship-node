@@ -294,38 +294,52 @@ class ServerManager {
      * Starts listening for requests (HTTPS)
      * @returns {Promise<object>} Details about the server
      */
-    listenSSL(cert=undefined, key=undefined, chain=undefined) {
+    listenSSL(email) {
         return new Promise((resolve, reject) => {
             this.listening = true;
-            this.server = https.createServer({ cert: cert, key: key, ca: chain }, async (req, res) => {
-                console.log(`${new Date().toISOString()} : ${req.url}`);
-                this.precall(req, res);
-
-                let regexPathMatched = false;
-
-                Object.keys(this.paths).forEach((path) => {
-                    if (path.startsWith("REGEXP /")) {
-                        let pathexp = new RegExp(path.replace(/^REGEXP \/(.*)\/$/g, "$1"));
-                        if (pathexp.test(req.method + "@@@" + req.url)) {
-                            if (regexPathMatched)
-                                throw new Error("Multiple Requestables registered to overlapping paths!");
-                            regexPathMatched = true;
-                            this.paths[path].call(req, res);
+            const gl = require("greenlock-express");
+            gl.init({
+                packageRoot: __dirname,
+                configDir: "./greenlock.d",
+                maintainerEmail: email,
+                cluster: false
+            });
+            .ready((glx) => {
+                if (this.port != 443) {
+                    console.warn("Port settings overridden to 80 & 443 because of SSL");
+                }
+                this.server = glx.createServer({ cert: cert, key: key, ca: chain }, async (req, res) => {
+                    console.log(`${new Date().toISOString()} : ${req.url}`);
+                    this.precall(req, res);
+    
+                    let regexPathMatched = false;
+    
+                    Object.keys(this.paths).forEach((path) => {
+                        if (path.startsWith("REGEXP /")) {
+                            let pathexp = new RegExp(path.replace(/^REGEXP \/(.*)\/$/g, "$1"));
+                            if (pathexp.test(req.method + "@@@" + req.url)) {
+                                if (regexPathMatched)
+                                    throw new Error("Multiple Requestables registered to overlapping paths!");
+                                regexPathMatched = true;
+                                this.paths[path].call(req, res);
+                            }
+                        }
+                    });
+    
+                    if (!regexPathMatched) {
+                        if (Object.keys(this.paths).includes(req.method + "@@@" + req.url.split("?")[0].split("#")[0])) {
+                            this.paths[req.method + "@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
+                        } else if (Object.keys(this.paths).includes("ANY@@@" + req.url.split("?")[0].split("#")[0])) {
+                            this.paths["ANY@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
+                        } else {
+                            this.fallback(req, res);
                         }
                     }
                 });
-
-                if (!regexPathMatched) {
-                    if (Object.keys(this.paths).includes(req.method + "@@@" + req.url.split("?")[0].split("#")[0])) {
-                        this.paths[req.method + "@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
-                    } else if (Object.keys(this.paths).includes("ANY@@@" + req.url.split("?")[0].split("#")[0])) {
-                        this.paths["ANY@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
-                    } else {
-                        this.fallback(req, res);
-                    }
-                }
+                glx.httpServer().listen(80, () => console.log("Listening for ACME http-01 challenges on", this.address));
+                this.server.listen(443, this.address, () => resolve({ url: `https://${this.address}:${this.port}`, paths: this.paths, config: this.config }));
             });
-            this.server.listen(this.port, this.address, () => resolve({ url: `http://${this.address}:${this.port}`, paths: this.paths, config: this.config }));
+
         });
 
     }
