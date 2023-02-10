@@ -7,7 +7,7 @@ async function main() {
         configDir: "./greenlock.d/",
         packageAgent: "Battleship Node/1.0.0",
         maintainerEmail: "battleship-node@kendlbat.dev",
-        staging: true,
+        staging: false,
         notify: function (event, details) {
             if ('error' === event) {
                 // `details` is an error object in this case
