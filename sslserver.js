@@ -33,7 +33,7 @@ async function main() {
 
     console.log("SSL config: " + sslconf);
 
-    var greenlockResp = greenlock.get({ servername: domain });
+    var greenlockResp = await greenlock.get({ servername: domain });
 
     console.log("Greenlock response: " + greenlockResp);
 
