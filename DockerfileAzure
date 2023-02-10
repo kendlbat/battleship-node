@@ -13,7 +13,7 @@ EXPOSE 80
 EXPOSE 443
 EXPOSE $PORT
 RUN npm install --no-save greenlock-express
-RUN npx greenlock init --config-dir /usr/src/app/greenlock.d --package greenlock-express --maintainer-email "ssl@kendlbat.dev" --agree-tos --community-member --staging
+RUN npx greenlock init --config-dir /usr/src/app/greenlock.d --maintainer-email "ssl@kendlbat.dev"
 RUN npx greenlock add --subject battleship.kendlbat.dev --altnames battleship.kendlbat.dev
 # CMD [ "node", "server.js" ]
 CMD ["npm", "run", "ssl", "--", "--staging"]
