@@ -9,6 +9,8 @@ WORKDIR /usr/src/app
 COPY . .
 RUN chown -R node /usr/src/app
 USER node
+EXPOSE 80
+EXPOSE 443
 EXPOSE $PORT
 RUN npm install --no-save greenlock
 CMD ["npm", "run", "ssl"]
