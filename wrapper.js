@@ -5,6 +5,7 @@
 
 const http = require("http");
 const fs = require("fs");
+const https = require("https");
 
 /**
  * Pre-written fallback function for 404 errors
@@ -258,6 +259,45 @@ class ServerManager {
         return new Promise((resolve, reject) => {
             this.listening = true;
             this.server = http.createServer(async (req, res) => {
+                console.log(`${new Date().toISOString()} : ${req.url}`);
+                this.precall(req, res);
+
+                let regexPathMatched = false;
+
+                Object.keys(this.paths).forEach((path) => {
+                    if (path.startsWith("REGEXP /")) {
+                        let pathexp = new RegExp(path.replace(/^REGEXP \/(.*)\/$/g, "$1"));
+                        if (pathexp.test(req.method + "@@@" + req.url)) {
+                            if (regexPathMatched)
+                                throw new Error("Multiple Requestables registered to overlapping paths!");
+                            regexPathMatched = true;
+                            this.paths[path].call(req, res);
+                        }
+                    }
+                });
+
+                if (!regexPathMatched) {
+                    if (Object.keys(this.paths).includes(req.method + "@@@" + req.url.split("?")[0].split("#")[0])) {
+                        this.paths[req.method + "@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
+                    } else if (Object.keys(this.paths).includes("ANY@@@" + req.url.split("?")[0].split("#")[0])) {
+                        this.paths["ANY@@@" + req.url.split("?")[0].split("#")[0]].call(req, res);
+                    } else {
+                        this.fallback(req, res);
+                    }
+                }
+            });
+            this.server.listen(this.port, this.address, () => resolve({ url: `http://${this.address}:${this.port}`, paths: this.paths, config: this.config }));
+        });
+    }
+
+    /**
+     * Starts listening for requests (HTTPS)
+     * @returns {Promise<object>} Details about the server
+     */
+    listenSSL(cert=undefined, key=undefined) {
+        return new Promise((resolve, reject) => {
+            this.listening = true;
+            this.server = https.createServer({ cert: cert, key: key }, async (req, res) => {
                 console.log(`${new Date().toISOString()} : ${req.url}`);
                 this.precall(req, res);
 

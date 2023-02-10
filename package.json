@@ -7,7 +7,8 @@
     "doc": "docs"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "ssl": "node sslserver.js"
   },
   "repository": {
     "type": "git",
