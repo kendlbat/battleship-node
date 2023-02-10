@@ -13,5 +13,5 @@ EXPOSE 80
 EXPOSE 443
 EXPOSE $PORT
 RUN npm install --no-save greenlock
-CMD [ "bash" ]
+CMD [ "/bin/bash" ]
 # CMD ["npm", "run", "ssl"]
