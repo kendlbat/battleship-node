@@ -308,7 +308,7 @@ class ServerManager {
                 if (this.port != 443) {
                     console.warn("Port settings overridden to 80 & 443 because of SSL");
                 }
-                this.server = glx.createServer({ cert: cert, key: key, ca: chain }, async (req, res) => {
+                this.server = glx.httpsServer(null, async (req, res) => {
                     console.log(`${new Date().toISOString()} : ${req.url}`);
                     this.precall(req, res);
     
