@@ -303,7 +303,7 @@ class ServerManager {
                 configDir: "./greenlock.d",
                 maintainerEmail: email,
                 cluster: false
-            });
+            })
             .ready((glx) => {
                 if (this.port != 443) {
                     console.warn("Port settings overridden to 80 & 443 because of SSL");
