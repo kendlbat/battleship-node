@@ -1,57 +1,63 @@
 var Greenlock = require('greenlock');
 var fs = require('fs');
-var greenlock = Greenlock.create({
-    packageRoot: __dirname,
-    configDir: "./greenlock.d/",
-    packageAgent: "Battleship Node/1.0.0",
-    maintainerEmail: "battleship-node@kendlbat.dev",
-    staging: true,
-    notify: function(event, details) {
-        if ('error' === event) {
-            // `details` is an error object in this case
-            console.error(details);
+
+async function main() {
+    var greenlock = Greenlock.create({
+        packageRoot: __dirname,
+        configDir: "./greenlock.d/",
+        packageAgent: "Battleship Node/1.0.0",
+        maintainerEmail: "battleship-node@kendlbat.dev",
+        staging: true,
+        notify: function (event, details) {
+            if ('error' === event) {
+                // `details` is an error object in this case
+                console.error(details);
+            }
         }
-    }
-});
+    });
 
-greenlock.manager
-    .defaults({
+    var cert, key, chain;
+
+    var domain = "battleship.kendlbat.dev";
+
+    var greenlockConf = await greenlock.manager.defaults({
         agreeToTerms: true,
-        subscriberEmail: 'ssl@kendlbat.dev'
-    })
-    .then(function(fullConfig) {
-        fs.writeFileSync('./greenlock.d/config.json', JSON.stringify(fullConfig, null, 2));
+        subscriberEmail: "ssl@kendlbat.dev"
+    });
+    console.log("Configured greenlock: " + greenlockConf);
+
+    var sslconf = await greenlock.add({
+        subject: domain,
+        altnames: [domain]
     });
 
-var cert = null;
-var key = null;
+    console.log("SSL config: " + sslconf);
 
-// Generate certs
-greenlock.manager
-    .get({
-        domains: ['docker.kendlbat.dev'],
-        email: 'ssl@kendlbat.dev',
-        agreeTos: true
-    })
-    .then(function(results) {
-        cert = results.cert;
-        key = results.privkey;
-    });
+    var greenlockResp = greenlock.get({ servername: domain });
 
-const { ServerManager, Requestable, NOTFOUNDFALLBACK } = require("./wrapper");
-const apiRouter = require("./api");
+    console.log("Greenlock response: " + greenlockResp);
 
-const PORT = process.env.PORT || 443;
-const ADDRESS = process.env.ADDRESS || "0.0.0.0";
+    cert = greenlockResp.cert;
+    key = greenlockResp.privkey;
+    chain = greenlockResp.chain;
 
-let server = new ServerManager({ address: ADDRESS, port: PORT });
+    const { ServerManager, Requestable, NOTFOUNDFALLBACK } = require("./wrapper");
+    const apiRouter = require("./api");
 
-server.register(Requestable.fromStaticFolder("./public", "/static"));
-server.register(Requestable.fromStaticFolder("./docs", "/docs"));
+    const PORT = process.env.PORT || 443;
+    const ADDRESS = process.env.ADDRESS || "0.0.0.0";
 
-// Home page redirect
-server.register(Requestable.redirect("/", "/static/index.html", "ANY", 302));
+    let server = new ServerManager({ address: ADDRESS, port: PORT });
 
-server.registerRouter(apiRouter, "/api");
+    server.register(Requestable.fromStaticFolder("./public", "/static"));
+    server.register(Requestable.fromStaticFolder("./docs", "/docs"));
 
-server.listenSSL(cert, key);
+    // Home page redirect
+    server.register(Requestable.redirect("/", "/static/index.html", "ANY", 302));
+
+    server.registerRouter(apiRouter, "/api");
+
+    server.listenSSL(cert, key);
+}
+
+main();
