@@ -1,11 +1,10 @@
-var pkg = require('./package.json');
 var Greenlock = require('greenlock');
 var fs = require('fs');
 var greenlock = Greenlock.create({
     packageRoot: __dirname,
     configDir: "./greenlock.d/",
-    packageAgent: pkg.name + '/' + pkg.version,
-    maintainerEmail: pkg.author,
+    packageAgent: "Battleship Node/1.0.0",
+    maintainerEmail: "battleship-node@kendlbat.dev",
     staging: true,
     notify: function(event, details) {
         if ('error' === event) {
