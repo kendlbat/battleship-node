@@ -242,7 +242,8 @@ gameRouter.register(new Requestable(async (req, res) => {
         status: "ok",
         state: game.status,
         turn: game.turn,
-        gameId: getCookies(req)["gameId"]
+        gameId: getCookies(req)["gameId"],
+        player: player
     }));
 }, "GET", "/status"));
 

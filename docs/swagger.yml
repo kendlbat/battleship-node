@@ -192,6 +192,13 @@ paths:
                       - starting
                       - playing
                       - finished
+                  player:
+                    type: number
+                    description: Number of the player
+                    example: 1
+                    enum:
+                      - 1
+                      - 2
               examples:
                 waiting:
                   summary: Game is waiting for players to join
@@ -200,6 +207,7 @@ paths:
                     state: "waiting"
                     turn: 0
                     gameId: "797236-0"
+                    player: 1
                 starting:
                   summary: Game is waiting for players to place their ships
                   value:
@@ -207,6 +215,7 @@ paths:
                     turn: 0
                     state: "starting"
                     gameId: "797236-0"
+                    player: 1
                 playing:
                   summary: Game is running
                   value:
@@ -214,6 +223,7 @@ paths:
                     turn: 1
                     state: "playing"
                     gameId: "797236-0"
+                    player: 1
                 finished:
                   summary: Game is over
                   value:
@@ -221,6 +231,7 @@ paths:
                     turn: 0
                     state: "finished"
                     gameId: "797236-0"
+                    player: 1
         "400":
           description: Bad request
           content:
