@@ -160,7 +160,7 @@ gameRouter.register(new Requestable(async (req, res) => {
         p1: token,
         p2: null,
         status: "waiting",
-        turn: Math.floor(Math.random() * 2) + 1
+        turn: 0
     };
 
     res.writeHead(200, {
@@ -355,6 +355,7 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     if (game.game.player1.board.getAvailableShips().length === 0 && game.game.player2.board.getAvailableShips().length === 0) {
         game.status = "playing";
+        game.turn = Math.floor(Math.random() * 2) + 1;
     }
 
     res.writeHead(200, { "Content-Type": "application/json" });
