@@ -176,6 +176,14 @@ paths:
                     description: ID of the game
                     example: "797236-0"
                     pattern: "^[0-9]{6}-[0-9]$"
+                  turn:
+                    type: number
+                    description: Number of the player whose turn it is - 0 if game is not running
+                    example: 1
+                    enum:
+                      - 0
+                      - 1
+                      - 2
                   state:
                     type: string
                     description: State of the game
@@ -190,23 +198,27 @@ paths:
                   value:
                     status: "ok"
                     state: "waiting"
+                    turn: 0
                     gameId: "797236-0"
                 starting:
                   summary: Game is waiting for players to place their ships
                   value:
                     status: "ok"
+                    turn: 0
                     state: "starting"
                     gameId: "797236-0"
                 playing:
                   summary: Game is running
                   value:
                     status: "ok"
+                    turn: 1
                     state: "playing"
                     gameId: "797236-0"
                 finished:
                   summary: Game is over
                   value:
                     status: "ok"
+                    turn: 0
                     state: "finished"
                     gameId: "797236-0"
         "400":

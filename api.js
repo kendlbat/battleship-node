@@ -131,6 +131,9 @@ apiRouter.register(new Requestable((req, res) => {
 }, "GET", "/test"));
 
 // Game logic
+/**
+ * @type {{[gameId: string]: { game: game.BattleshipGame, p1: string, p2: string, status: string, winner?: number, turn: number }}
+ */
 let games = {};
 
 /**
@@ -156,7 +159,8 @@ gameRouter.register(new Requestable(async (req, res) => {
         game: new game.BattleshipGame(10, 10),
         p1: token,
         p2: null,
-        status: "waiting"
+        status: "waiting",
+        turn: Math.floor(Math.random() * 2) + 1
     };
 
     res.writeHead(200, {
@@ -237,6 +241,7 @@ gameRouter.register(new Requestable(async (req, res) => {
     res.end(JSON.stringify({
         status: "ok",
         state: game.status,
+        turn: game.turn,
         gameId: getCookies(req)["gameId"]
     }));
 }, "GET", "/status"));
@@ -380,6 +385,12 @@ gameRouter.register(new Requestable(async (req, res) => {
         board = game.game.player1.board.getCurrentState();
     else if (player === 2)
         board = game.game.player2.board.getCurrentState();
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+        status: "ok",
+        board: board
+    }));
 }, "GET", "/getBoard"));
 
 /**
@@ -472,13 +483,13 @@ gameRouter.register(new Requestable(async (req, res) => {
  * Guesses a position on the opponents board
  */
 gameRouter.register(new Requestable(async (req, res) => {
-    let game = getGameFromRequest(req, res);
-    if (!game) return;
+    let reqgame = getGameFromRequest(req, res);
+    if (!reqgame) return;
 
-    let playerNumber = whichPlayer(req, res, game);
-    if (!player) return;
+    let playerNumber = whichPlayer(req, res, reqgame);
+    if (!playerNumber) return;
 
-    if (game.status !== "playing") {
+    if (reqgame.status !== "playing") {
         sendJSONError(400, "Game not in correct state", res);
         return;
     }
@@ -492,7 +503,7 @@ gameRouter.register(new Requestable(async (req, res) => {
         return;
     }
 
-    if (!body || !body.x || !body.y) {
+    if (!body || body.x === undefined || body.y === undefined) {
         sendJSONError(400, "Malformed request", res);
         return;
     }
@@ -505,14 +516,23 @@ gameRouter.register(new Requestable(async (req, res) => {
         return;
     }
 
+    /**
+     * @type {game.BattleshipPlayer}
+     */
     let player;
 
     if (playerNumber === 1) 
-        player = game.game.player1;
+        player = reqgame.game.player1;
     else if (playerNumber === 2)
-        player = game.game.player2;
+        player = reqgame.game.player2;
 
-    let guess = playerNumber.guess(x, y);
+    if (playerNumber !== reqgame.turn) {
+        sendJSONError(400, "Not your turn", res);
+        return;
+    }
+
+    let guess = player.guess(x, y);
+    
 
     if (!guess) {
         sendJSONError(400, "Invalid guess", res);
@@ -521,8 +541,8 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     if (guess.result === game.BattleshipGuess.HIT) {
         if (player.board.isEveryShipSunk()) {
-            game.status = "finished";
-            game.winner = playerNumber;
+            reqgame.status = "finished";
+            reqgame.winner = playerNumber;
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({
                 status: "ok",
