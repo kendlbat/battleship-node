@@ -131,6 +131,9 @@ apiRouter.register(new Requestable((req, res) => {
 }, "GET", "/test"));
 
 // Game logic
+/**
+ * @type {{[gameId: string]: { game: game.BattleshipGame, p1: string, p2: string, status: string, winner?: number, turn: number }}
+ */
 let games = {};
 
 /**
@@ -156,7 +159,8 @@ gameRouter.register(new Requestable(async (req, res) => {
         game: new game.BattleshipGame(10, 10),
         p1: token,
         p2: null,
-        status: "waiting"
+        status: "waiting",
+        turn: 0
     };
 
     res.writeHead(200, {
@@ -224,7 +228,7 @@ gameRouter.register(new Requestable(async (req, res) => {
  * NOTE: This is the ONE endpoint that should be polled continuously
  * @todo Add rate limiting to THE OTHER ENDPOINTS (not this one)
  */
- gameRouter.register(new Requestable(async (req, res) => {
+gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
     if (!game) return;
 
@@ -237,7 +241,9 @@ gameRouter.register(new Requestable(async (req, res) => {
     res.end(JSON.stringify({
         status: "ok",
         state: game.status,
-        gameId: getCookies(req)["gameId"]
+        turn: game.turn,
+        gameId: getCookies(req)["gameId"],
+        player: player
     }));
 }, "GET", "/status"));
 
@@ -316,7 +322,13 @@ gameRouter.register(new Requestable(async (req, res) => {
     let success;
     // ships has to include every ship from getAvailableShips()
 
-    let vesselCheck = [ ...game.game.player1.board.getAvailableShips() ];
+    let vesselCheck;
+
+    if (player === 1) {
+        vesselCheck = [...game.game.player1.board.getAvailableShips()];
+    } else if (player === 2) {
+        vesselCheck = [...game.game.player2.board.getAvailableShips()];
+    }
 
     if (!vesselCheck.length === ships.length) {
         sendJSONError(400, "Invalid number of ships", res);
@@ -350,6 +362,7 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     if (game.game.player1.board.getAvailableShips().length === 0 && game.game.player2.board.getAvailableShips().length === 0) {
         game.status = "playing";
+        game.turn = Math.floor(Math.random() * 2) + 1;
     }
 
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -380,6 +393,12 @@ gameRouter.register(new Requestable(async (req, res) => {
         board = game.game.player1.board.getCurrentState();
     else if (player === 2)
         board = game.game.player2.board.getCurrentState();
+
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({
+        status: "ok",
+        board: board
+    }));
 }, "GET", "/getBoard"));
 
 /**
@@ -424,10 +443,10 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     let guesses;
 
-    if (player === 1)
-        guesses = game.game.player2.board.guesses;
-    else if (player === 2)
+    if (player === 2)
         guesses = game.game.player1.board.guesses;
+    else if (player === 1)
+        guesses = game.game.player2.board.guesses;
 
 
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -456,9 +475,9 @@ gameRouter.register(new Requestable(async (req, res) => {
     let guesses;
 
     if (player === 1)
-        guesses = game.game.player2.board.getGuesses();
-    else if (player === 2)
         guesses = game.game.player1.board.getGuesses();
+    else if (player === 2)
+        guesses = game.game.player2.board.getGuesses();
 
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
@@ -472,13 +491,13 @@ gameRouter.register(new Requestable(async (req, res) => {
  * Guesses a position on the opponents board
  */
 gameRouter.register(new Requestable(async (req, res) => {
-    let game = getGameFromRequest(req, res);
-    if (!game) return;
+    let reqgame = getGameFromRequest(req, res);
+    if (!reqgame) return;
 
-    let playerNumber = whichPlayer(req, res, game);
-    if (!player) return;
+    let playerNumber = whichPlayer(req, res, reqgame);
+    if (!playerNumber) return;
 
-    if (game.status !== "playing") {
+    if (reqgame.status !== "playing") {
         sendJSONError(400, "Game not in correct state", res);
         return;
     }
@@ -492,7 +511,7 @@ gameRouter.register(new Requestable(async (req, res) => {
         return;
     }
 
-    if (!body || !body.x || !body.y) {
+    if (!body || body.x === undefined || body.y === undefined) {
         sendJSONError(400, "Malformed request", res);
         return;
     }
@@ -505,14 +524,22 @@ gameRouter.register(new Requestable(async (req, res) => {
         return;
     }
 
+    /**
+     * @type {game.BattleshipPlayer}
+     */
     let player;
 
-    if (playerNumber === 1) 
-        player = game.game.player1;
+    if (playerNumber === 1)
+        player = reqgame.game.player2;
     else if (playerNumber === 2)
-        player = game.game.player2;
+        player = reqgame.game.player1;
 
-    let guess = playerNumber.guess(x, y);
+    if (playerNumber !== reqgame.turn) {
+        sendJSONError(400, "Not your turn", res);
+        return;
+    }
+
+    let guess = player.board.guess(x, y);
 
     if (!guess) {
         sendJSONError(400, "Invalid guess", res);
@@ -521,8 +548,8 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     if (guess.result === game.BattleshipGuess.HIT) {
         if (player.board.isEveryShipSunk()) {
-            game.status = "finished";
-            game.winner = playerNumber;
+            reqgame.status = "finished";
+            reqgame.winner = playerNumber;
             res.writeHead(200, { "Content-Type": "application/json" });
             res.end(JSON.stringify({
                 status: "ok",
@@ -543,6 +570,8 @@ gameRouter.register(new Requestable(async (req, res) => {
             result: "miss"
         }));
     }
+
+    reqgame.turn = playerNumber === 1 ? 2 : 1;
 }, "POST", "/guess"));
 
 /**

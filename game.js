@@ -39,7 +39,6 @@ class BattleshipPlayer {
         this.board = new BattleshipBoard(boardWidth, boardHeight);
     }
 
-
     /**
      * 
      * @param {BattleshipVessel[]} vessels 
@@ -82,7 +81,7 @@ class BattleshipBoard {
      * @returns {BattleshipGuess || null} The Guess if it is valid, null if invalid
      */
     guess(x, y) {
-        if (this.guesses.every((guess) => guess.x != x || guess.y != y))
+        if (this.guesses.find((guess) => guess.x == x && guess.y == y))
             return null;
         let guess = new BattleshipGuess(x, y, this.checkSpace(x, y) ? BattleshipGuess.HIT : BattleshipGuess.MISS);
 
@@ -169,10 +168,18 @@ class BattleshipBoard {
     placeVessels(vessels) {
         for (let vessel of vessels)
             if (!this.placeShip(vessel)) {
-                this.ships = undefined;
-                this.ships = [];
+                this.ships.length = 0;
                 return false;
             }
+        let counter = 0;
+        for (let row of this.getCurrentState())
+            for (let cell of row)
+                if (cell)
+                    counter++;
+        if (counter !== vessels.reduce((acc, vessel) => acc + vessel.size, 0)) {
+            this.ships.length = 0;
+            return false;
+        }
         return true;
     }
 
@@ -190,6 +197,10 @@ class BattleshipBoard {
             // console.log(board[y]);
         }
         return board;
+    }
+
+    getGuesses() {
+        return this.guesses;
     }
 }
 

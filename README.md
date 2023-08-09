@@ -24,6 +24,12 @@ services:
   battleship-node:
     image: ghcr.io/kendlbat/battleship-node:latest
     ports:
-      - "8080:8080"
-    
+      - "8080:8080" 
+```
+
+### Node
+```bash
+git clone https://github.com/kendlbat/battleship-node
+cd battleship-node
+node server.js
 ```
