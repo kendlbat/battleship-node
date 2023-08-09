@@ -160,7 +160,8 @@ gameRouter.register(new Requestable(async (req, res) => {
         p1: token,
         p2: null,
         status: "waiting",
-        turn: 0
+        turn: 0,
+        birth: Date.now()
     };
 
     res.writeHead(200, {
@@ -604,6 +605,16 @@ gameRouter.register(new Requestable(async (req, res) => {
         status: "ok"
     }));
 }, "GET", "/quit"));
+
+setInterval(() => {
+    // Delete all finished or inactive games
+    for (let gameId in games) {
+        let game = games[gameId];
+        if (game.status === "finished" || Date.now() - game.birth > 1000 * 60 * 60 * 8) {
+            delete games[gameId];
+        }
+    }
+}, 1000 * 60 * 60 * 8);
 
 
 
