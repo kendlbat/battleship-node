@@ -1,6 +1,7 @@
 <!--
 Win screen - status: "finished"
 -->
+<button type="submit" onclick="(async () => { await fetch('/api/game/quit'); document.location.reload(); })();">Quit</button>
 <script>
     window.x.statusPoll = () => {
         window.x.APIHandler.status().then(console.log);
