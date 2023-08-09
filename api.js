@@ -565,14 +565,13 @@ gameRouter.register(new Requestable(async (req, res) => {
             }));
         }
     } else if (guess.result === game.BattleshipGuess.MISS) {
+        reqgame.turn = playerNumber === 1 ? 2 : 1;
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({
             status: "ok",
             result: "miss"
         }));
     }
-
-    reqgame.turn = playerNumber === 1 ? 2 : 1;
 }, "POST", "/guess"));
 
 /**
