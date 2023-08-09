@@ -18,7 +18,12 @@ async function main() {
 
     server.registerRouter(apiRouter, "/api");
 
-    server.listenSSL("ssl@kendlbat.dev");
+    try {
+        server.listenSSL("ssl@kendlbat.dev");
+    } catch (e) {
+        console.error(e);
+        server.listen().then(console.log);
+    }
 }
 
 main();
