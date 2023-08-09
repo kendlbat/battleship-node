@@ -10,6 +10,9 @@ info:
   version: "1.0"
 servers:
   - url: http://localhost:8080/api
+    description: Local Test Server
+  - url: https://battleship.kendlbat.dev/api
+    description: battleship.kendlbat.dev
 tags:
   - name: game
     description: Game API
