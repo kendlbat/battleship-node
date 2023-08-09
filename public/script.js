@@ -94,7 +94,9 @@ async function main() {
         APIHandler.quit();
         loadComponent("components/login.html", document.querySelector("#componentContainer"));
     } else if (status.status == "ok") {
-        if (status.state == "starting") {
+        if (status.state == "waiting") {
+            loadComponent("components/waitScreen.html", document.querySelector("#componentContainer"));
+        } else if (status.state == "starting") {
             loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
         } else if (status.state == "playing") {
             loadComponent("components/playing.html", document.querySelector("#componentContainer"));
