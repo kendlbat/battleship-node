@@ -11,3 +11,5 @@ services:
         ADDRESS: "0.0.0.0"
     environment:
       NODE_ENV: production
+    ports:
+      - "8080:8080"
