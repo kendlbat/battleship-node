@@ -18,6 +18,7 @@
         window.x.statusPoll = () => {
             window.x.APIHandler.status().then((status) => {
                 window.x.statusPrint(status);
+                document.querySelector("#waitScreenComp-code").innerText = status.gameId;
                 if (status.state == "starting") {
                     window.x.statusPoll = () => { return undefined };
                     window.x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
