@@ -201,7 +201,7 @@ class BattleshipBoard {
         for (let y = 0; y < this.height; y++) {
             board.push([]);
             for (let x = 0; x < this.width; x++) {
-                board[y][x] = this.checkSpace(x, y);
+                board[y][x] = this.checkSpace(y, x);
             }
             // DEBUG
             // console.log(board[y]);

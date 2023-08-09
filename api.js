@@ -322,7 +322,13 @@ gameRouter.register(new Requestable(async (req, res) => {
     let success;
     // ships has to include every ship from getAvailableShips()
 
-    let vesselCheck = [ ...game.game.player1.board.getAvailableShips() ];
+    let vesselCheck;
+
+    if (player === 1) {
+        vesselCheck = [ ...game.game.player1.board.getAvailableShips() ];
+    } else if (player === 2) {
+        vesselCheck = [ ...game.game.player2.board.getAvailableShips() ];
+    }
 
     if (!vesselCheck.length === ships.length) {
         sendJSONError(400, "Invalid number of ships", res);
@@ -535,7 +541,6 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     let guess = player.guess(x, y);
     
-
     if (!guess) {
         sendJSONError(400, "Invalid guess", res);
         return;
@@ -565,6 +570,8 @@ gameRouter.register(new Requestable(async (req, res) => {
             result: "miss"
         }));
     }
+
+    reqgame.turn = playerNumber === 1 ? 2 : 1;
 }, "POST", "/guess"));
 
 /**
