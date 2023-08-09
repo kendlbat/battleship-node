@@ -1,7 +1,7 @@
 FROM node:lts-alpine
 ENV NODE_ENV=production
 # Get port from argument
-ARG PORT=8080
+ARG PORT=80
 ENV PORT=$PORT
 ARG ADDRESS="0.0.0.0"
 ENV ADDRESS=$ADDRESS
