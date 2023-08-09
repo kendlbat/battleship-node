@@ -437,9 +437,9 @@ gameRouter.register(new Requestable(async (req, res) => {
 
     let guesses;
 
-    if (player === 1)
+    if (player === 2)
         guesses = game.game.player2.board.guesses;
-    else if (player === 2)
+    else if (player === 1)
         guesses = game.game.player1.board.guesses;
 
 
