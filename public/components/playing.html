@@ -2,3 +2,193 @@
 This file is responsible for the "playing" status
 This is where players play the game
 -->
+<style>
+    #playing-phase {
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        position: fixed;
+        box-sizing: border-box;
+        overflow: auto;
+    }
+
+    #playing-phase.playerturn {
+        border: 5px solid #3a3;
+    }
+
+    #playing-maincont {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+        align-items: center;
+        width: 100%;
+        height: calc(100% - 3em);
+        top: 3em;
+        position: absolute;
+    }
+
+    #playing-turndisplay {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 2em;
+        height: 3em;
+        white-space: nowrap;
+    }
+
+    #playing-maincont table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    #playing-maincont table tr {
+        height: var(--board-cell-size);
+    }
+
+    #playing-maincont table td {
+        min-width: var(--board-cell-size);
+        min-height: var(--board-cell-size);
+        border: var(--board-cell-border);
+        border-radius: var(--board-cell-border-radius);
+        aspect-ratio: 1;
+    }
+
+    #playing-maincont table td.ship {
+        background-color: var(--pregame-ship-placed);
+    }
+
+    #playing-maincont table td.miss {
+        background-image: url("/static/assets/cross.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        filter: invert(1);
+    }
+
+    #playing-maincont table td.hit {
+        background-image: url("/static/assets/cross.svg");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-color: #0aa;
+        filter: invert(1);
+    }
+</style>
+<div id="playing-phase">
+    <div id="playing-turndisplay"></div>
+    <div id="playing-maincont">
+        <div id="playing-mytablecont"></div>
+        <div id="playing-othertablecont"></div>
+    </div>
+</div>
+<script>
+    async function main() {
+        /**
+        * @param {[[boolean]]} board
+        * @returns {Promise<HTMLTableElement>}
+        */
+        async function generateMyBoard(board) {
+            /**
+             * @type {[{ x: number; y: number; result: string; }]}
+             */
+            let oppguesses = (await window.x.APIHandler.getOpponentsGuesses()).guesses;
+
+            let table = document.createElement("table");
+            table.id = "player-table";
+
+            let i = 0;
+            let j = 0;
+
+            for (let row of board) {
+                let tr = document.createElement("tr");
+                for (let col of row) {
+                    let td = document.createElement("td");
+                    if (col) td.classList.add("ship");
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+
+            for (let guess of oppguesses) {
+                let td = table.rows[guess.y].cells[guess.x];
+                td.classList.add(guess.result);
+            }
+
+            document.querySelector("#playing-mytablecont").innerHTML = "<h1>My Board</h1>";
+            document.querySelector("#playing-mytablecont").appendChild(table);
+        }
+
+        async function generateOpponentBoard(myturn) {
+            let guesses = (await window.x.APIHandler.getMyGuesses()).guesses;
+
+            let dims = await window.x.APIHandler.getBoardDimensions();
+
+            let table = document.createElement("table");
+
+            for (let i = 0; i < dims.height; i++) {
+                let tr = document.createElement("tr");
+                for (let j = 0; j < dims.width; j++) {
+                    let td = document.createElement("td");
+                    td.dataset.x = j;
+                    td.dataset.y = i;
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+
+            for (let guess of guesses) {
+                let td = table.querySelector(`td[data-x="${guess.x}"][data-y="${guess.y}"]`);
+                td.classList.add(guess.result);
+            }
+
+            if (myturn) {
+                table.addEventListener("click", (e) => {
+                    if (e.target.tagName == "TD") {
+                        let x = e.target.dataset.x;
+                        let y = e.target.dataset.y;
+                        window.x.APIHandler.guess(x, y).then(() => {
+                            window.x.statusPoll();
+                        });
+                    }
+                });
+            } else {
+                table.classList.add("disabled");
+            }
+
+            document.querySelector("#playing-othertablecont").innerHTML = "<h1>Opponent Board</h1>";
+            document.querySelector("#playing-othertablecont").appendChild(table);
+        }
+
+        let myships = (await window.x.APIHandler.getBoard()).board;
+
+        window.x.statusPoll = () => {
+            window.x.APIHandler.status().then((status) => {
+                if (status.turn == status.player) {
+                    document.querySelector("#playing-phase").classList.add("playerturn");
+                    document.querySelector("#playing-turndisplay").innerText = "Your Turn";
+                } else {
+                    document.querySelector("#playing-phase").classList.remove("playerturn");
+                    document.querySelector("#playing-turndisplay").innerText = "Opponent's Turn";
+                }
+
+                if (status.state == "starting") {
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/pregame.html", document.querySelector("#componentContainer"));
+                } else if (status.state == "finished") {
+                    window.x.statusPoll = () => { return undefined };
+                    window.x.loadComponent("components/finished.html", document.querySelector("#componentContainer"));
+                }
+
+                generateMyBoard(myships);
+                generateOpponentBoard(status.turn == status.player);
+            });
+        };
+
+        window.x.statusPoll();
+    }
+
+    main();
+</script>

@@ -41,16 +41,6 @@ class BattleshipPlayer {
 
     /**
      * 
-     * @param {number} x 
-     * @param {number} y 
-     */
-    guess(x, y) {
-        return this.board.guess(x, y);
-    }
-
-
-    /**
-     * 
      * @param {BattleshipVessel[]} vessels 
      */
     placeVessels(vessels) {
@@ -201,7 +191,7 @@ class BattleshipBoard {
         for (let y = 0; y < this.height; y++) {
             board.push([]);
             for (let x = 0; x < this.width; x++) {
-                board[y][x] = this.checkSpace(y, x);
+                board[y][x] = this.checkSpace(x, y);
             }
             // DEBUG
             // console.log(board[y]);

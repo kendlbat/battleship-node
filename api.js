@@ -228,7 +228,7 @@ gameRouter.register(new Requestable(async (req, res) => {
  * NOTE: This is the ONE endpoint that should be polled continuously
  * @todo Add rate limiting to THE OTHER ENDPOINTS (not this one)
  */
- gameRouter.register(new Requestable(async (req, res) => {
+gameRouter.register(new Requestable(async (req, res) => {
     let game = getGameFromRequest(req, res);
     if (!game) return;
 
@@ -325,9 +325,9 @@ gameRouter.register(new Requestable(async (req, res) => {
     let vesselCheck;
 
     if (player === 1) {
-        vesselCheck = [ ...game.game.player1.board.getAvailableShips() ];
+        vesselCheck = [...game.game.player1.board.getAvailableShips()];
     } else if (player === 2) {
-        vesselCheck = [ ...game.game.player2.board.getAvailableShips() ];
+        vesselCheck = [...game.game.player2.board.getAvailableShips()];
     }
 
     if (!vesselCheck.length === ships.length) {
@@ -444,9 +444,9 @@ gameRouter.register(new Requestable(async (req, res) => {
     let guesses;
 
     if (player === 2)
-        guesses = game.game.player2.board.guesses;
-    else if (player === 1)
         guesses = game.game.player1.board.guesses;
+    else if (player === 1)
+        guesses = game.game.player2.board.guesses;
 
 
     res.writeHead(200, { "Content-Type": "application/json" });
@@ -475,9 +475,9 @@ gameRouter.register(new Requestable(async (req, res) => {
     let guesses;
 
     if (player === 1)
-        guesses = game.game.player2.board.getGuesses();
-    else if (player === 2)
         guesses = game.game.player1.board.getGuesses();
+    else if (player === 2)
+        guesses = game.game.player2.board.getGuesses();
 
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({
@@ -529,18 +529,18 @@ gameRouter.register(new Requestable(async (req, res) => {
      */
     let player;
 
-    if (playerNumber === 1) 
-        player = reqgame.game.player1;
-    else if (playerNumber === 2)
+    if (playerNumber === 1)
         player = reqgame.game.player2;
+    else if (playerNumber === 2)
+        player = reqgame.game.player1;
 
     if (playerNumber !== reqgame.turn) {
         sendJSONError(400, "Not your turn", res);
         return;
     }
 
-    let guess = player.guess(x, y);
-    
+    let guess = player.board.guess(x, y);
+
     if (!guess) {
         sendJSONError(400, "Invalid guess", res);
         return;

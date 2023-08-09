@@ -26,6 +26,12 @@
     color: var(--font-color);
 }
 
+@media (orientation: portrait) {
+    :root {
+        --board-cell-size: 40px;
+    }
+}
+
 * {
     box-sizing: border-box;
 }
